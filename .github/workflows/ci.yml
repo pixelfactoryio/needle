@@ -1,0 +1,51 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.13.x, 1.14.x, 1.15.x]
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Cache go modules
+        uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: |
+          go get golang.org/x/lint/golint
+          wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
+          sudo dpkg -i step-cli_0.15.2_amd64.deb
+
+      - name: Run go fmt
+        if: runner.os != 'Windows'
+        run: diff -u <(echo -n) <(gofmt -d -s .)
+
+      - name: Run go lint
+        run: make lint
+
+      - name: Run go vet
+        run: make vet
+
+      - name: Run go test
+        run: make ca-test cert-test test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
