@@ -6,6 +6,11 @@ import (
 	"go.pixelfactory.io/needle/cmd"
 	"go.pixelfactory.io/pkg/observability/log"
 	"go.pixelfactory.io/pkg/observability/log/fields"
+
+	_ "github.com/coredns/coredns/plugin/forward"
+	_ "github.com/coredns/coredns/plugin/hosts"
+	_ "github.com/coredns/coredns/plugin/log"
+	_ "github.com/coredns/coredns/plugin/loop"
 )
 
 func main() {

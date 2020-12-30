@@ -13,6 +13,7 @@ import (
 	"go.pixelfactory.io/needle/internal/api/handlers"
 	"go.pixelfactory.io/needle/internal/services/pki"
 
+	"go.pixelfactory.io/needle/internal/pkg/coredns"
 	"go.pixelfactory.io/needle/internal/pkg/server"
 	"go.pixelfactory.io/needle/internal/pkg/version"
 	"go.pixelfactory.io/needle/internal/repository/boltdb"
@@ -27,6 +28,8 @@ var httpPort string
 var httpsPort string
 var httpServerTimeout time.Duration
 var httpServerShutdownTimeout time.Duration
+var corednsEnabled bool
+var corednsConfFile string
 
 var startCmd = &cobra.Command{
 	Use:   "start",
@@ -72,6 +75,16 @@ func NewStartCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
+	startCmd.PersistentFlags().BoolVar(&corednsEnabled, "coredns-enabled", false, "Enable embedded CoreDNS")
+	if err := bindFlag("coredns-enabled"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().StringVar(&corednsConfFile, "coredns-conf-file", "Corefile", "CoreDNS configuration file")
+	if err := bindFlag("coredns-conf-file"); err != nil {
+		return nil, err
+	}
+
 	return startCmd, nil
 }
 
@@ -92,6 +105,11 @@ func start(c *cobra.Command, args []string) error {
 		fields.String("server-timeout", httpServerTimeout.String()),
 		fields.String("server-shutdown-timeout", httpServerShutdownTimeout.String()),
 	)
+
+	if corednsEnabled {
+		dnsServer := coredns.NewCoreDNSServer()
+		go dnsServer.Run()
+	}
 
 	// Setup tls certificate service
 	rootCA, err := tls.LoadX509KeyPair(caFile, caKeyFile)
