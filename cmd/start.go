@@ -13,6 +13,7 @@ import (
 	"go.pixelfactory.io/needle/internal/api/handlers"
 	"go.pixelfactory.io/needle/internal/services/pki"
 
+	"go.pixelfactory.io/needle/internal/pkg/coredns"
 	"go.pixelfactory.io/needle/internal/pkg/server"
 	"go.pixelfactory.io/needle/internal/pkg/version"
 	"go.pixelfactory.io/needle/internal/repository/boltdb"
@@ -27,6 +28,10 @@ var httpPort string
 var httpsPort string
 var httpServerTimeout time.Duration
 var httpServerShutdownTimeout time.Duration
+var corednsEnabled bool
+var corednsPort int
+var corednsHostsFile string
+var corednsUpstreams []string
 
 var startCmd = &cobra.Command{
 	Use:   "start",
@@ -52,12 +57,12 @@ func NewStartCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().StringVar(&httpPort, "http-port", "80", "HTTP bind port")
+	startCmd.PersistentFlags().StringVar(&httpPort, "http-port", "80", "HTTP port")
 	if err := bindFlag("http-port"); err != nil {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().StringVar(&httpsPort, "https-port", "443", "HTTPS bind port")
+	startCmd.PersistentFlags().StringVar(&httpsPort, "https-port", "443", "HTTPS port")
 	if err := bindFlag("https-port"); err != nil {
 		return nil, err
 	}
@@ -69,6 +74,26 @@ func NewStartCmd() (*cobra.Command, error) {
 
 	startCmd.PersistentFlags().DurationVar(&httpServerShutdownTimeout, "server-shutdown-timeout", 5*time.Second, "Server shutdown timeout")
 	if err := bindFlag("server-shutdown-timeout"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().BoolVar(&corednsEnabled, "coredns", false, "Enable embedded CoreDNS")
+	if err := bindFlag("coredns"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().IntVar(&corednsPort, "coredns-port", 53, "CoreDNS port")
+	if err := bindFlag("coredns-port"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().StringVar(&corednsHostsFile, "coredns-hosts-file", "data/hosts", "Hosts file path")
+	if err := bindFlag("coredns-hosts-file"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().StringSliceVar(&corednsUpstreams, "coredns-upstreams", []string{"1.1.1.1", "8.8.8.8"}, "Upstream DNS servers")
+	if err := bindFlag("coredns-upstreams"); err != nil {
 		return nil, err
 	}
 
@@ -92,6 +117,15 @@ func start(c *cobra.Command, args []string) error {
 		fields.String("server-timeout", httpServerTimeout.String()),
 		fields.String("server-shutdown-timeout", httpServerShutdownTimeout.String()),
 	)
+
+	if corednsEnabled {
+		dnsServer := coredns.NewCoreDNSServer(
+			coredns.WithPort(corednsPort),
+			coredns.WithHostsFile(corednsHostsFile),
+			coredns.WithUpstreams(corednsUpstreams),
+		)
+		go dnsServer.Run()
+	}
 
 	// Setup tls certificate service
 	rootCA, err := tls.LoadX509KeyPair(caFile, caKeyFile)

@@ -13,7 +13,7 @@ func NewRouter(logger log.Logger, caFile string) *mux.Router {
 	handler := handlers.NewPixelHandler(caFile)
 	router := mux.NewRouter()
 	router.Use(middleware.Logging(logger))
-	router.PathPrefix("/install-pixelserv-root-ca").HandlerFunc(handler.GetRootCA)
+	router.PathPrefix("/install-root-ca").HandlerFunc(handler.GetRootCA)
 	router.PathPrefix("/").HandlerFunc(handler.GetPixel)
 	return router
 }

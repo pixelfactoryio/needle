@@ -10,9 +10,9 @@ COPY . .
 
 RUN go mod download
 
-RUN make
+RUN make bin/needle
 
-FROM alpine:3.11
+FROM alpine:3.12
 
 COPY --from=builder /build/bin/needle /usr/bin/needle
 

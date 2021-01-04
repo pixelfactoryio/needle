@@ -9,11 +9,11 @@ import (
 	"go.pixelfactory.io/needle/internal/pkg/version"
 )
 
-var envPrefix = "PIXELSERV"
+var envPrefix = "NEEDLE"
 var logLevel string
 
 var rootCmd = &cobra.Command{
-	Use:           "pixelserv",
+	Use:           "needle",
 	Short:         "needle",
 	SilenceErrors: true,
 	SilenceUsage:  true,
