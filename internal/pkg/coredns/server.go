@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/coredns/caddy"
+	"github.com/coredns/coredns/core/dnsserver"
 	"go.pixelfactory.io/pkg/observability/log"
 	"go.pixelfactory.io/pkg/observability/log/fields"
 )
@@ -28,13 +29,34 @@ func WithLogger(l log.Logger) Option {
 	}
 }
 
+// WithPort set server port
+func WithPort(p int) Option {
+	return func(s *DNSServer) {
+		s.port = p
+	}
+}
+
+// WithHostsFile set hosts file
+func WithHostsFile(h string) Option {
+	return func(s *DNSServer) {
+		s.hostsfile = h
+	}
+}
+
+// WithUpstreams set upstream dns servers
+func WithUpstreams(u []string) Option {
+	return func(s *DNSServer) {
+		s.upsteams = u
+	}
+}
+
 // NewCoreDNSServer create new DNSServer with default values
 func NewCoreDNSServer(opts ...Option) *DNSServer {
 	srv := &DNSServer{
 		name:      "coredns",
 		port:      53,
 		hostsfile: "hosts",
-		upsteams:  []string{"1.1.1.1", "8.8.8.8"},
+		upsteams:  []string{"/etc/resolv.conf"},
 	}
 
 	for _, opt := range opts {
@@ -48,6 +70,7 @@ func NewCoreDNSServer(opts ...Option) *DNSServer {
 	}
 
 	caddy.Quiet = true // don't show init stuff from caddy
+	dnsserver.Quiet = true
 	caddy.SetDefaultCaddyfileLoader("default", caddy.LoaderFunc(srv.defaultLoader))
 
 	return srv
@@ -84,6 +107,7 @@ func (s *DNSServer) renderCorefile() []byte {
 			fallthrough
 		}
 		forward . {{range $server := .Upstreams}} {{$server}} {{end}}
+		cache
 		loop
 	}`
 

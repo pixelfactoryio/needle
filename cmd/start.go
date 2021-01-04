@@ -29,7 +29,9 @@ var httpsPort string
 var httpServerTimeout time.Duration
 var httpServerShutdownTimeout time.Duration
 var corednsEnabled bool
-var corednsConfFile string
+var corednsPort int
+var corednsHostsFile string
+var corednsUpstreams []string
 
 var startCmd = &cobra.Command{
 	Use:   "start",
@@ -55,12 +57,12 @@ func NewStartCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().StringVar(&httpPort, "http-port", "80", "HTTP bind port")
+	startCmd.PersistentFlags().StringVar(&httpPort, "http-port", "80", "HTTP port")
 	if err := bindFlag("http-port"); err != nil {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().StringVar(&httpsPort, "https-port", "443", "HTTPS bind port")
+	startCmd.PersistentFlags().StringVar(&httpsPort, "https-port", "443", "HTTPS port")
 	if err := bindFlag("https-port"); err != nil {
 		return nil, err
 	}
@@ -75,13 +77,23 @@ func NewStartCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().BoolVar(&corednsEnabled, "coredns-enabled", false, "Enable embedded CoreDNS")
-	if err := bindFlag("coredns-enabled"); err != nil {
+	startCmd.PersistentFlags().BoolVar(&corednsEnabled, "coredns", false, "Enable embedded CoreDNS")
+	if err := bindFlag("coredns"); err != nil {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().StringVar(&corednsConfFile, "coredns-conf-file", "Corefile", "CoreDNS configuration file")
-	if err := bindFlag("coredns-conf-file"); err != nil {
+	startCmd.PersistentFlags().IntVar(&corednsPort, "coredns-port", 53, "CoreDNS port")
+	if err := bindFlag("coredns-port"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().StringVar(&corednsHostsFile, "coredns-hosts-file", "data/hosts", "Hosts file path")
+	if err := bindFlag("coredns-hosts-file"); err != nil {
+		return nil, err
+	}
+
+	startCmd.PersistentFlags().StringSliceVar(&corednsUpstreams, "coredns-upstreams", []string{"1.1.1.1", "8.8.8.8"}, "Upstream DNS servers")
+	if err := bindFlag("coredns-upstreams"); err != nil {
 		return nil, err
 	}
 
@@ -107,7 +119,11 @@ func start(c *cobra.Command, args []string) error {
 	)
 
 	if corednsEnabled {
-		dnsServer := coredns.NewCoreDNSServer()
+		dnsServer := coredns.NewCoreDNSServer(
+			coredns.WithPort(corednsPort),
+			coredns.WithHostsFile(corednsHostsFile),
+			coredns.WithUpstreams(corednsUpstreams),
+		)
 		go dnsServer.Run()
 	}
 
