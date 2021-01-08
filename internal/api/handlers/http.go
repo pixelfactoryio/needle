@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 )
 
 // 1x1 transparent pixel
@@ -28,11 +29,27 @@ func NewPixelHandler(caFile string) PixelHandler {
 
 // GetPixel respond with 1x1 transparent gif
 func (h *handler) GetPixel(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "image/gif")
-	w.Header().Set("Content-Length", fmt.Sprint(len(pixel)))
-	w.Header().Set("Accept-Ranges", "bytes")
+
 	w.WriteHeader(http.StatusOK)
-	w.Write(pixel)
+
+	ext := filepath.Ext(r.URL.Path)
+	switch ext {
+	case ".htm", ".html":
+		w.Header().Set("Content-Type", "text/html")
+	case ".css":
+		w.Header().Set("Content-Type", "text/css")
+	case ".js":
+		w.Header().Set("Content-Type", "application/javascript")
+		w.Write([]byte("console.log('blocked by needle;')"))
+	case ".json":
+		w.Header().Set("Content-Type", "application/json")
+	default:
+		w.Header().Set("Content-Type", "image/gif")
+		w.Header().Set("Content-Length", fmt.Sprint(len(pixel)))
+		w.Header().Set("Accept-Ranges", "bytes")
+		w.WriteHeader(http.StatusOK)
+		w.Write(pixel)
+	}
 }
 
 func (h *handler) GetRootCA(w http.ResponseWriter, r *http.Request) {
