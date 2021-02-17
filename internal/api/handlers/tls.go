@@ -32,7 +32,9 @@ func NewTLSHandler(logger log.Logger, certificateService pki.CertificateService)
 
 // Get tls.Certificate from given name
 func (h *TLSHandler) Get(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
-	h.logger.Debug("Getting certificate", fields.String("ServerName", helloInfo.ServerName), fields.String("LocalAddr", helloInfo.Conn.LocalAddr().String()))
+	h.logger.Debug("Getting certificate",
+		fields.String("ServerName", helloInfo.ServerName), fields.String("LocalAddr", helloInfo.Conn.LocalAddr().String()),
+	)
 
 	name := getHostIP(helloInfo.Conn.LocalAddr().String())
 	if len(helloInfo.ServerName) > 0 {

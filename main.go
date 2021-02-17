@@ -16,10 +16,15 @@ import (
 
 func main() {
 	logger := log.New()
-	defer logger.Sync()
 
 	if err := cmd.Execute(); err != nil {
-		logger.Error("An unexpected error occured", fields.Error(err))
+		logger.Error("An unexpected error occurred", fields.Error(err))
+
+		err := logger.Sync()
+		if err != nil {
+			logger.Error("an error occurred while running logger.Sync()", fields.Error(err))
+		}
+
 		os.Exit(1)
 	}
 }

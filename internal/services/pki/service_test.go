@@ -17,7 +17,14 @@ func setup(t *testing.T) (tls.Certificate, *pki.Certificate) {
 	}
 
 	certPEM, err := ioutil.ReadFile("testdata/certs/test.needle.local.crt")
+	if err != nil {
+		t.Error("Unable to get certPEM", err)
+	}
+
 	keyPEM, err := ioutil.ReadFile("testdata/certs/test.needle.local.key")
+	if err != nil {
+		t.Error("Unable to get keyPEM", err)
+	}
 
 	testCert := pki.Certificate{
 		Name:    "test.needle.local",

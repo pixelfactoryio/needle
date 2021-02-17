@@ -21,7 +21,12 @@ var rootCmd = &cobra.Command{
 
 // NewRootCmd create new rootCmd
 func NewRootCmd() (*cobra.Command, error) {
-	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal, panic)")
+	rootCmd.PersistentFlags().StringVar(
+		&logLevel,
+		"log-level",
+		"info",
+		"Log level (debug, info, warn, error, fatal, panic)",
+	)
 	if err := bindFlag("log-level"); err != nil {
 		return nil, err
 	}

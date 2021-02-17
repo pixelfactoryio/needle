@@ -17,7 +17,7 @@ type HTTPHandlerService interface {
 	GetRootCA(http.ResponseWriter, *http.Request)
 }
 
-type HTTPHandler struct {
+type httpHandler struct {
 	caFile string
 }
 
@@ -32,7 +32,11 @@ func (h *HTTPHandler) GetPixel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", fmt.Sprint(len(pixel)))
 	w.Header().Set("Accept-Ranges", "bytes")
 	w.WriteHeader(http.StatusOK)
-	w.Write(pixel)
+	_, err := w.Write(pixel)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
 }
 
 func (h *HTTPHandler) GetRootCA(w http.ResponseWriter, r *http.Request) {

@@ -19,11 +19,9 @@ import (
 	"go.pixelfactory.io/needle/internal/repository/boltdb"
 )
 
-var rootCA tls.Certificate
 var caFile string
 var caKeyFile string
 var dbFile string
-var cacheDB *storm.DB
 var httpPort string
 var httpsPort string
 var httpServerTimeout time.Duration
@@ -72,7 +70,8 @@ func NewStartCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().DurationVar(&httpServerShutdownTimeout, "server-shutdown-timeout", 5*time.Second, "Server shutdown timeout")
+	startCmd.PersistentFlags().DurationVar(
+		&httpServerShutdownTimeout, "server-shutdown-timeout", 5*time.Second, "Server shutdown timeout")
 	if err := bindFlag("server-shutdown-timeout"); err != nil {
 		return nil, err
 	}
@@ -92,7 +91,8 @@ func NewStartCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
-	startCmd.PersistentFlags().StringSliceVar(&corednsUpstreams, "coredns-upstreams", []string{"1.1.1.1", "8.8.8.8"}, "Upstream DNS servers")
+	startCmd.PersistentFlags().StringSliceVar(
+		&corednsUpstreams, "coredns-upstreams", []string{"1.1.1.1", "8.8.8.8"}, "Upstream DNS servers")
 	if err := bindFlag("coredns-upstreams"); err != nil {
 		return nil, err
 	}
@@ -104,7 +104,12 @@ func start(c *cobra.Command, args []string) error {
 	// Setup logger
 	logger := log.New(log.WithLevel(logLevel))
 	logger = logger.With(fields.Service("needle", version.REVISION))
-	defer logger.Sync()
+	defer func() {
+		err := logger.Sync()
+		if err != nil {
+			logger.Error("an error occurred while running logger.Sync()", fields.Error(err))
+		}
+	}()
 
 	logger.Debug("Application Start")
 	logger.Debug(
@@ -138,7 +143,12 @@ func start(c *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() {
+		err := client.Close()
+		if err != nil {
+			logger.Error("an error occurred while closing *storm.DB client", fields.Error(err))
+		}
+	}()
 
 	// Setup service
 	service := pki.NewCertificateService(
@@ -148,7 +158,10 @@ func start(c *cobra.Command, args []string) error {
 
 	// Setup certificate handler and tls.Config
 	certHandler := handlers.NewTLSHandler(logger, service)
-	tlsConfig := &tls.Config{GetCertificate: certHandler.Get}
+	tlsConfig := &tls.Config{
+		MinVersion:     tls.VersionTLS12,
+		GetCertificate: certHandler.Get,
+	}
 
 	// Setup http handler
 	httpHandler := handlers.NewPixelHandler(caFile)

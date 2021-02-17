@@ -93,13 +93,17 @@ func NewServer(opts ...Option) *Server {
 	// setup default server timeout
 	if srv.config.HTTPServerTimeout == 0 {
 		srv.config.HTTPServerTimeout = 60 * time.Second
-		srv.logger.Debug("Using default HTTPServerTimeout", fields.String("server-timeout", srv.config.HTTPServerTimeout.String()))
+		srv.logger.Debug("Using default HTTPServerTimeout",
+			fields.String("server-timeout", srv.config.HTTPServerTimeout.String()),
+		)
 	}
 
 	// setup default server shutdown timeout
 	if srv.config.HTTPServerShutdownTimeout == 0 {
 		srv.config.HTTPServerShutdownTimeout = 5 * time.Second
-		srv.logger.Debug("Using default HTTPServerShutdownTimeout", fields.String("server-timeout", srv.config.HTTPServerShutdownTimeout.String()))
+		srv.logger.Debug("Using default HTTPServerShutdownTimeout",
+			fields.String("server-timeout", srv.config.HTTPServerShutdownTimeout.String()),
+		)
 	}
 
 	return srv
@@ -127,7 +131,12 @@ func (s *Server) ListenAndServe() {
 		s.tlsConfig.NextProtos = append(s.tlsConfig.NextProtos, "http/1.1")
 		ln = tls.NewListener(ln, s.tlsConfig)
 	}
-	defer ln.Close()
+	defer func() {
+		err := ln.Close()
+		if err != nil {
+			s.logger.Error("an error occurred while closing net.Listener", fields.Error(err))
+		}
+	}()
 
 	// run server in background
 	go func() {
