@@ -12,26 +12,26 @@ import (
 	"go.pixelfactory.io/needle/internal/services/pki"
 )
 
-// CertificateHandler interface
-type CertificateHandler interface {
+// TLSHandlerService interface
+type TLSHandlerService interface {
 	Get(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)
 }
 
-type tlsHandler struct {
+type TLSHandler struct {
 	certificateService pki.CertificateService
 	logger             log.Logger
 }
 
-// NewCertificateHandler creates tlsHandler
-func NewCertificateHandler(logger log.Logger, certificateService pki.CertificateService) CertificateHandler {
-	return &tlsHandler{
+// NewTLSHandler creates tlsHandler
+func NewTLSHandler(logger log.Logger, certificateService pki.CertificateService) *TLSHandler {
+	return &TLSHandler{
 		certificateService: certificateService,
 		logger:             logger,
 	}
 }
 
 // Get tls.Certificate from given name
-func (h *tlsHandler) Get(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
+func (h *TLSHandler) Get(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	h.logger.Debug("Getting certificate", fields.String("ServerName", helloInfo.ServerName), fields.String("LocalAddr", helloInfo.Conn.LocalAddr().String()))
 
 	name := getHostIP(helloInfo.Conn.LocalAddr().String())

@@ -147,11 +147,23 @@ func start(c *cobra.Command, args []string) error {
 	)
 
 	// Setup certificate handler and tls.Config
-	certHandler := handlers.NewCertificateHandler(logger, service)
+	certHandler := handlers.NewTLSHandler(logger, service)
 	tlsConfig := &tls.Config{GetCertificate: certHandler.Get}
 
 	// Setup http handler
-	router := api.NewRouter(logger, caFile)
+	httpHandler := handlers.NewPixelHandler(caFile)
+	routes := []api.Route{
+		{
+			Path:        "/install-root-ca",
+			HandlerFunc: httpHandler.GetRootCA,
+		},
+		{
+			Path:        "/",
+			HandlerFunc: httpHandler.GetPixel,
+		},
+	}
+
+	router := api.NewRouter(logger, routes...)
 
 	tlsSrv := server.NewServer(
 		server.WithLogger(logger),
