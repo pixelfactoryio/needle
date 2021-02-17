@@ -38,6 +38,7 @@ var startCmd = &cobra.Command{
 }
 
 // NewStartCmd command topic
+// nolint
 func NewStartCmd() (*cobra.Command, error) {
 
 	startCmd.PersistentFlags().StringVar(&caFile, "ca", "data/certs/root-ca.crt", "Root CA Certificate path")
@@ -160,19 +161,18 @@ func start(c *cobra.Command, args []string) error {
 	certHandler := handlers.NewTLSHandler(logger, service)
 	tlsConfig := &tls.Config{
 		MinVersion:     tls.VersionTLS12,
-		GetCertificate: certHandler.Get,
+		GetCertificate: certHandler,
 	}
 
 	// Setup http handler
-	httpHandler := handlers.NewPixelHandler(caFile)
 	routes := []api.Route{
 		{
-			Path:        "/install-root-ca",
-			HandlerFunc: httpHandler.GetRootCA,
+			Path:    "/install-root-ca",
+			Handler: handlers.NewCAHandler(caFile),
 		},
 		{
-			Path:        "/",
-			HandlerFunc: httpHandler.GetPixel,
+			Path:    "/",
+			Handler: handlers.NewDefaultHandler(),
 		},
 	}
 
