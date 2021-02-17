@@ -18,17 +18,18 @@ type CertificateFactory interface {
 	Create(name string) (*Certificate, error)
 }
 
-type factory struct {
+// Factory represents the certificate factory
+type Factory struct {
 	rootCA tls.Certificate
 }
 
 // NewFactory create certificateFactory
-func NewFactory(rootCA tls.Certificate) CertificateFactory {
-	return &factory{rootCA: rootCA}
+func NewFactory(rootCA tls.Certificate) *Factory {
+	return &Factory{rootCA: rootCA}
 }
 
 // Create creates certificate
-func (f *factory) Create(name string) (*Certificate, error) {
+func (f *Factory) Create(name string) (*Certificate, error) {
 	serialNumber, err := getSerialNumber()
 	if err != nil {
 		return nil, err

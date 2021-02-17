@@ -12,30 +12,30 @@ type CertificateService interface {
 	GetOrCreate(name string) (*Certificate, error)
 }
 
-type certificateService struct {
+type Service struct {
 	certRepo    CertificateRepository
 	certFactory CertificateFactory
 }
 
 // NewCertificateService create new CertificateService
-func NewCertificateService(certRepo CertificateRepository, certFactory CertificateFactory) CertificateService {
-	return &certificateService{
+func NewCertificateService(certRepo CertificateRepository, certFactory CertificateFactory) *Service {
+	return &Service{
 		certRepo:    certRepo,
 		certFactory: certFactory,
 	}
 }
 
-func (cs *certificateService) GetOrCreate(name string) (*Certificate, error) {
+func (s *Service) GetOrCreate(name string) (*Certificate, error) {
 	var cert *Certificate
-	cert, err := cs.certRepo.Get(name)
+	cert, err := s.certRepo.Get(name)
 	if errors.Cause(err) == ErrCertificateNotFound {
 		// Create new Certificate
-		cert, err = cs.certFactory.Create(name)
+		cert, err = s.certFactory.Create(name)
 		if err != nil {
 			return nil, errors.Wrap(err, "pki.CertificateService.FindOrCreate")
 		}
 		// Store Certificate
-		err := cs.certRepo.Store(cert)
+		err := s.certRepo.Store(cert)
 		if err != nil {
 			return nil, errors.Wrap(err, "pki.CertificateService.FindOrCreate")
 		}
