@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/cobra"
 	"go.pixelfactory.io/pkg/observability/log"
 	"go.pixelfactory.io/pkg/observability/log/fields"
+	"go.pixelfactory.io/pkg/server"
 
 	"go.pixelfactory.io/needle/internal/api"
 	"go.pixelfactory.io/needle/internal/api/handlers"
 	"go.pixelfactory.io/needle/internal/services/pki"
 
 	"go.pixelfactory.io/needle/internal/pkg/coredns"
-	"go.pixelfactory.io/needle/internal/pkg/server"
 	"go.pixelfactory.io/needle/internal/pkg/version"
 	"go.pixelfactory.io/needle/internal/repository/boltdb"
 )
@@ -178,27 +178,33 @@ func start(c *cobra.Command, args []string) error {
 
 	router := api.NewRouter(logger, routes...)
 
-	tlsSrv := server.NewServer(
+	tlsSrv, err := server.NewServer(
 		server.WithLogger(logger),
 		server.WithRouter(router),
-		server.WithConfig(&server.Config{
-			Port:                      httpsPort,
-			HTTPServerTimeout:         httpServerTimeout,
-			HTTPServerShutdownTimeout: httpServerShutdownTimeout,
-		}),
+		server.WithPort(httpsPort),
+		server.WithHTTPServerTimeout(httpServerTimeout),
+		server.WithHTTPServerShutdownTimeout(httpServerShutdownTimeout),
 		server.WithTLSConfig(tlsConfig),
 	)
+
+	if err != nil {
+		return err
+	}
+	// Start TLS Server
 	go tlsSrv.ListenAndServe()
 
-	httpSrv := server.NewServer(
+	httpSrv, _ := server.NewServer(
 		server.WithLogger(logger),
 		server.WithRouter(router),
-		server.WithConfig(&server.Config{
-			Port:                      httpPort,
-			HTTPServerTimeout:         httpServerTimeout,
-			HTTPServerShutdownTimeout: httpServerShutdownTimeout,
-		}),
+		server.WithPort(httpPort),
+		server.WithHTTPServerTimeout(httpServerTimeout),
+		server.WithHTTPServerShutdownTimeout(httpServerShutdownTimeout),
 	)
+
+	if err != nil {
+		return err
+	}
+	// Start HTTP Server
 	httpSrv.ListenAndServe()
 
 	return nil
