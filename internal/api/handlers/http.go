@@ -11,31 +11,37 @@ var pixel = []byte{
 	249, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 2, 68, 1, 0, 59,
 }
 
-// PixelHandler interface
-type PixelHandler interface {
-	GetPixel(http.ResponseWriter, *http.Request)
-	GetRootCA(http.ResponseWriter, *http.Request)
-}
+type httpHandler struct{}
 
-type handler struct {
+type caHandler struct {
 	caFile string
 }
 
-// NewPixelHandler create PixelHandler
-func NewPixelHandler(caFile string) PixelHandler {
-	return &handler{caFile: caFile}
+// NewDefaultHandler create NewDefaultHandler
+func NewDefaultHandler() http.Handler {
+	return &httpHandler{}
 }
 
-// GetPixel respond with 1x1 transparent gif
-func (h *handler) GetPixel(w http.ResponseWriter, r *http.Request) {
+// ServeHTTP respond with 1x1 transparent gif
+func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/gif")
 	w.Header().Set("Content-Length", fmt.Sprint(len(pixel)))
 	w.Header().Set("Accept-Ranges", "bytes")
 	w.WriteHeader(http.StatusOK)
-	w.Write(pixel)
+	_, err := w.Write(pixel)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
 }
 
-func (h *handler) GetRootCA(w http.ResponseWriter, r *http.Request) {
+// NewCAHandler create NewCAHandler
+func NewCAHandler(ca string) http.Handler {
+	return &caHandler{caFile: ca}
+}
+
+// ServeHTTP respond with public CA certificat
+func (h *caHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/x-x509-ca-cert")
 	http.ServeFile(w, r, h.caFile)
 }

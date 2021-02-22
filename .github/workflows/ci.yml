@@ -26,21 +26,15 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      - name: Install dependencies
-        run: |
-          go get golang.org/x/lint/golint
-          wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-          sudo dpkg -i step-cli_0.15.2_amd64.deb
-
       - name: Run go fmt
         if: runner.os != 'Windows'
         run: diff -u <(echo -n) <(gofmt -d -s .)
 
-      - name: Run go lint
-        run: make lint
-
-      - name: Run go vet
-        run: make vet
+      - name: Run golangci-lint
+        if: runner.os != 'Windows'
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29
 
       - name: Run go test
         run: make ca-test cert-test test

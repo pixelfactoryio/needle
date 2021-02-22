@@ -12,48 +12,37 @@ import (
 	"go.pixelfactory.io/needle/internal/services/pki"
 )
 
-// CertificateHandler interface
-type CertificateHandler interface {
-	Get(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)
-}
+// CertificateHandlerFunc returns a Certificate based on the given ClientHelloInfo
+type CertificateHandlerFunc func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 
-type tlsHandler struct {
-	certificateService pki.CertificateService
-	logger             log.Logger
-}
+// NewTLSHandler creates tlsHandler
+func NewTLSHandler(logger log.Logger, certificateService pki.CertificateService) CertificateHandlerFunc {
+	return func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
+		logger.Debug("Getting certificate",
+			fields.String("ServerName", helloInfo.ServerName), fields.String("LocalAddr", helloInfo.Conn.LocalAddr().String()),
+		)
 
-// NewCertificateHandler creates tlsHandler
-func NewCertificateHandler(logger log.Logger, certificateService pki.CertificateService) CertificateHandler {
-	return &tlsHandler{
-		certificateService: certificateService,
-		logger:             logger,
+		name := getHostIP(helloInfo.Conn.LocalAddr().String())
+		if len(helloInfo.ServerName) > 0 {
+			name = helloInfo.ServerName
+		}
+
+		certificate, err := certificateService.GetOrCreate(name)
+		if err != nil {
+			err := errors.Wrap(err, "api.CertificateHandler.Get")
+			logger.Error("Unable to find certificate", fields.String("CommonName", name), fields.Error(err))
+			return nil, err
+		}
+
+		tlsCert, err := tls.X509KeyPair(certificate.CertPEM, certificate.KeyPEM)
+		if err != nil {
+			err := errors.Wrap(err, "api.CertificateHandler.Get")
+			logger.Error("Error creating certificate", fields.String("CommonName", name), fields.Error(err))
+			return nil, err
+		}
+
+		return &tlsCert, nil
 	}
-}
-
-// Get tls.Certificate from given name
-func (h *tlsHandler) Get(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
-	h.logger.Debug("Getting certificate", fields.String("ServerName", helloInfo.ServerName), fields.String("LocalAddr", helloInfo.Conn.LocalAddr().String()))
-
-	name := getHostIP(helloInfo.Conn.LocalAddr().String())
-	if len(helloInfo.ServerName) > 0 {
-		name = helloInfo.ServerName
-	}
-
-	certificate, err := h.certificateService.GetOrCreate(name)
-	if err != nil {
-		err := errors.Wrap(err, "api.CertificateHandler.Get")
-		h.logger.Error("Unable to find certificate", fields.String("CommonName", name), fields.Error(err))
-		return nil, err
-	}
-
-	tlsCert, err := tls.X509KeyPair(certificate.CertPEM, certificate.KeyPEM)
-	if err != nil {
-		err := errors.Wrap(err, "api.CertificateHandler.Get")
-		h.logger.Error("Error creating certificate", fields.String("CommonName", name), fields.Error(err))
-		return nil, err
-	}
-
-	return &tlsCert, nil
 }
 
 func getHostIP(localAddr string) string {

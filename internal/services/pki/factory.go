@@ -18,18 +18,20 @@ type CertificateFactory interface {
 	Create(name string) (*Certificate, error)
 }
 
-type factory struct {
+// Factory represents the certificate factory
+type Factory struct {
 	rootCA tls.Certificate
 }
 
 // NewFactory create certificateFactory
-func NewFactory(rootCA tls.Certificate) CertificateFactory {
-	return &factory{rootCA: rootCA}
+func NewFactory(rootCA tls.Certificate) *Factory {
+	return &Factory{rootCA: rootCA}
 }
 
 // Create creates certificate
-func (f *factory) Create(name string) (*Certificate, error) {
-	serialNumber, err := getSerialNumber()
+func (f *Factory) Create(name string) (*Certificate, error) {
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -69,29 +71,20 @@ func (f *factory) Create(name string) (*Certificate, error) {
 	}
 
 	certPEM := new(bytes.Buffer)
-	pem.Encode(certPEM, &pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
+	if err := pem.Encode(certPEM, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes}); err != nil {
+		return nil, err
+	}
 
 	certPrivKeyPEM := new(bytes.Buffer)
-	pem.Encode(certPrivKeyPEM, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey),
-	})
+	if err := pem.Encode(
+		certPrivKeyPEM,
+		&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey)}); err != nil {
+		return nil, err
+	}
 
 	return &Certificate{
 		Name:    name,
 		CertPEM: certPEM.Bytes(),
 		KeyPEM:  certPrivKeyPEM.Bytes(),
 	}, nil
-}
-
-func getSerialNumber() (*big.Int, error) {
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	if err != nil {
-		return nil, err
-	}
-	return serialNumber, nil
 }

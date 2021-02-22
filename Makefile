@@ -11,7 +11,7 @@ test:
 .PHONY: test
 
 lint:
-	@golint -set_exit_status ./...
+	@golangci-lint run ./...
 .PHONY: lint
 
 vet:
