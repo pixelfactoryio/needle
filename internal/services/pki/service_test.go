@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"go.pixelfactory.io/needle/internal/services/pki"
 	"go.pixelfactory.io/needle/mocks/pkimock"
@@ -56,13 +57,14 @@ func Test_GetOrCreate(t *testing.T) {
 
 	t.Run("Create certificate", func(t *testing.T) {
 		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
-		repo.On("Store", testCert).Return(nil).Once()
 		factory.On("Create", "test.needle.local").Return(testCert, nil).Once()
+		repo.On("Store", testCert).Return(nil).Once()
 
 		cert, err := svc.GetOrCreate("test.needle.local")
 		is.NoError(err)
 		is.NotEmpty(cert)
 		repo.AssertExpectations(t)
+		factory.AssertExpectations(t)
 	})
 
 	t.Run("Get certificate", func(t *testing.T) {
@@ -75,5 +77,28 @@ func Test_GetOrCreate(t *testing.T) {
 		is.NotEmpty(cert.KeyPEM)
 		is.Equal(cert, testCert)
 		repo.AssertExpectations(t)
+	})
+
+	t.Run("Get certificate create error", func(t *testing.T) {
+		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
+		factory.On("Create", "test.needle.local").Return(nil, errors.New("unable to create certificate")).Once()
+
+		cert, err := svc.GetOrCreate("test.needle.local")
+		is.Error(err)
+		is.Empty(cert)
+		repo.AssertExpectations(t)
+		factory.AssertExpectations(t)
+	})
+
+	t.Run("Get certificate store error", func(t *testing.T) {
+		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
+		factory.On("Create", "test.needle.local").Return(testCert, nil).Once()
+		repo.On("Store", testCert).Return(errors.New("unable to store certificate")).Once()
+
+		cert, err := svc.GetOrCreate("test.needle.local")
+		is.Error(err)
+		is.Empty(cert)
+		repo.AssertExpectations(t)
+		factory.AssertExpectations(t)
 	})
 }

@@ -58,4 +58,11 @@ func Test_Create(t *testing.T) {
 			is.NoError(err)
 		})
 	})
+
+	t.Run("Create certificate IP", func(t *testing.T) {
+		// create certificate
+		cert, err := certFactory.Create("192.168.1.1")
+		is.NoError(err)
+		is.Equal(cert.Name, "192.168.1.1")
+	})
 }

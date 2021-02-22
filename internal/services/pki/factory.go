@@ -30,7 +30,8 @@ func NewFactory(rootCA tls.Certificate) *Factory {
 
 // Create creates certificate
 func (f *Factory) Create(name string) (*Certificate, error) {
-	serialNumber, err := getSerialNumber()
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -86,13 +87,4 @@ func (f *Factory) Create(name string) (*Certificate, error) {
 		CertPEM: certPEM.Bytes(),
 		KeyPEM:  certPrivKeyPEM.Bytes(),
 	}, nil
-}
-
-func getSerialNumber() (*big.Int, error) {
-	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
-	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	if err != nil {
-		return nil, err
-	}
-	return serialNumber, nil
 }
