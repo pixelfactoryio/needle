@@ -9,14 +9,13 @@ import (
 	"go.pixelfactory.io/pkg/observability/log"
 	"go.pixelfactory.io/pkg/observability/log/fields"
 	"go.pixelfactory.io/pkg/server"
+	"go.pixelfactory.io/pkg/version"
 
 	"go.pixelfactory.io/needle/internal/api"
 	"go.pixelfactory.io/needle/internal/api/handlers"
-	"go.pixelfactory.io/needle/internal/services/pki"
-
 	"go.pixelfactory.io/needle/internal/pkg/coredns"
-	"go.pixelfactory.io/needle/internal/pkg/version"
 	"go.pixelfactory.io/needle/internal/repository/boltdb"
+	"go.pixelfactory.io/needle/internal/services/pki"
 )
 
 var caFile string
