@@ -16,6 +16,7 @@ require (
 	go.etcd.io/bbolt v1.3.5 // indirect
 	go.pixelfactory.io/pkg/observability/log v1.2.0
 	go.pixelfactory.io/pkg/server v0.1.0
+	go.pixelfactory.io/pkg/version v0.1.0
 	golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43 // indirect
 	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
