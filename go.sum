@@ -641,6 +641,8 @@ go.pixelfactory.io/pkg/observability/log v1.2.0 h1:gfdHMMwXUCdKYnQQpAotNhxdTFqtq
 go.pixelfactory.io/pkg/observability/log v1.2.0/go.mod h1:AhiBrkTrh4fG2djin49HJVIjNPB5X9JHdywEcysmMI8=
 go.pixelfactory.io/pkg/server v0.1.0 h1:/u3OvIQ/WQDIXGK8RFmdyVUswodiBqdWw2yYfKEonT0=
 go.pixelfactory.io/pkg/server v0.1.0/go.mod h1:HplTAQ7qOY30hn/KVCdCFCmsK9Mi4rA3vbsOSfp1950=
+go.pixelfactory.io/pkg/version v0.1.0 h1:HK+uvMADE1bZ/Rdwet4o1YF7F/c5ZdEwfBnZWyrpa9U=
+go.pixelfactory.io/pkg/version v0.1.0/go.mod h1:wc4uuUNsbqgcfL0amMAZfxsRZHMqTQGm7f4wkYo1Fs4=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/atomic v1.5.0/go.mod h1:sABNBOSYdrvTF6hTgEIbc7YasKWGhgEQZyfxyTvoXHQ=

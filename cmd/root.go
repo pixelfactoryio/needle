@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"go.pixelfactory.io/needle/internal/pkg/version"
+	"go.pixelfactory.io/pkg/version"
 )
 
 var envPrefix = "NEEDLE"
