@@ -7,13 +7,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"go.pixelfactory.io/needle/internal/services/pki"
+	"go.pixelfactory.io/needle/testdata"
 )
 
 func Test_NewFactory(t *testing.T) {
 	t.Parallel()
 	is := require.New(t)
 
-	rootCA, _ := setup(t)
+	rootCA, _ := testdata.Setup(t)
 
 	certFactory := pki.NewFactory(rootCA)
 	is.NotEmpty(certFactory)
@@ -24,7 +25,7 @@ func Test_Create(t *testing.T) {
 	t.Parallel()
 	is := require.New(t)
 
-	rootCA, _ := setup(t)
+	rootCA, _ := testdata.Setup(t)
 	x509CACert, err := x509.ParseCertificate(rootCA.Certificate[0])
 	if err != nil {
 		t.Error("Error:", err)

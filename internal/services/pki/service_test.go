@@ -1,39 +1,14 @@
 package pki_test
 
 import (
-	"crypto/tls"
-	"io/ioutil"
 	"testing"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"go.pixelfactory.io/needle/internal/services/pki"
 	"go.pixelfactory.io/needle/mocks/pkimock"
+	"go.pixelfactory.io/needle/testdata"
 )
-
-func setup(t *testing.T) (tls.Certificate, *pki.Certificate) {
-	rootCA, err := tls.LoadX509KeyPair("testdata/certs/root-ca.crt", "testdata/certs/root-ca.key")
-	if err != nil {
-		t.Error("Unable to get rootCA", err)
-	}
-
-	certPEM, err := ioutil.ReadFile("testdata/certs/test.needle.local.crt")
-	if err != nil {
-		t.Error("Unable to get certPEM", err)
-	}
-
-	keyPEM, err := ioutil.ReadFile("testdata/certs/test.needle.local.key")
-	if err != nil {
-		t.Error("Unable to get keyPEM", err)
-	}
-
-	testCert := pki.Certificate{
-		Name:    "test.needle.local",
-		CertPEM: certPEM,
-		KeyPEM:  keyPEM,
-	}
-	return rootCA, &testCert
-}
 
 func Test_NewCertificateService(t *testing.T) {
 	t.Parallel()
@@ -50,7 +25,7 @@ func Test_GetOrCreate(t *testing.T) {
 	t.Parallel()
 	is := require.New(t)
 
-	_, testCert := setup(t)
+	_, testCert := testdata.Setup(t)
 	repo := &pkimock.CertificateRepository{}
 	factory := &pkimock.CertificateFactory{}
 	svc := pki.NewCertificateService(repo, factory)
