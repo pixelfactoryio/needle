@@ -1,5 +1,5 @@
 include global.mk
-include openssl.mk
+include ssl.mk
 
 GO_LDFLAGS := -X go.pixelfactory.io/needle/internal/pkg/version.REVISION=$(VERSION) $(GO_LDFLAGS)
 GO_LDFLAGS := -X go.pixelfactory.io/needle/internal/pkg/version.BUILDDATE=$(BUILD_DATE) $(GO_LDFLAGS)
