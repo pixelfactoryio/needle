@@ -19,3 +19,4 @@ testdata/certs
 needle
 coverage.*
 bin/needle
+dist
