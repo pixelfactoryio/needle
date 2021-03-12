@@ -1,19 +1,8 @@
-FROM golang:1.15-alpine AS builder
+FROM alpine:3.13
 
-RUN apk --no-cache update && \
-    apk --no-cache upgrade && \
-    apk --no-cache add git build-base
+COPY needle_*.apk /tmp/
 
-WORKDIR /build
+RUN apk add --allow-untrusted /tmp/needle_*.apk \
+    && rm -fr /tmp/needle_*.apk
 
-COPY . .
-
-RUN go mod download
-
-RUN make bin/needle
-
-FROM alpine:3.12
-
-COPY --from=builder /build/bin/needle /usr/bin/needle
-
-ENTRYPOINT ["/usr/bin/needle"]
+ENTRYPOINT ["/usr/local/bin/needle"]
