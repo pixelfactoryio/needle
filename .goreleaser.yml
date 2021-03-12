@@ -60,8 +60,6 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source={{.GitURL}}"
       - "--platform=linux/amd64"
-    extra_files:
-      - scripts/entrypoint.sh
   - image_templates:
       - 'pixelfactory/needle:{{ .Tag }}-arm64'
     dockerfile: Dockerfile
@@ -75,8 +73,6 @@ dockers:
       - "--label=org.opencontainers.image.source={{.GitURL}}"
       - "--platform=linux/arm64"
     goarch: arm64
-    extra_files:
-      - scripts/entrypoint.sh
 
 docker_manifests:
   - name_template: 'pixelfactory/needle:{{ .Tag }}'
