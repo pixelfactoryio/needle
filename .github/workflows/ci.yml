@@ -22,16 +22,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Cache go modules
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
-          restore-keys: ${{ runner.os }}-go-
-
-      - name: Install dependencies
-        run: |
-          wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
-          sudo dpkg -i step-cli_0.15.2_amd64.deb
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Run go fmt
         run: diff -u <(echo -n) <(gofmt -d -s .)
@@ -40,6 +36,11 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.29
+
+      - name: Install step
+        run: |
+          wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
+          sudo dpkg -i /tmp/step-cli_0.15.2_amd64.deb
 
       - name: Run go test
         run: make ca-test cert-test test
