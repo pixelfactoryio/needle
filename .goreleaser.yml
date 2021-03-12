@@ -35,6 +35,55 @@ changelog:
     - Merge branch
     - go mod tidy
 
+nfpms:
+  - file_name_template: '{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    homepage: https://github.com/pixelfactoryio/needle
+    description: Deliver Go binaries as fast and easily as possible
+    maintainer: Amine Benseddik <amine@pixelfactory.io>
+    license: MIT
+    vendor: pixelfactory.io
+    formats:
+    - apk
+    - deb
+    - rpm
+
+dockers:
+  - image_templates:
+      - 'pixelfactory/needle:{{ .Tag }}-amd64'
+    dockerfile: Dockerfile
+    use_buildx: true
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/amd64"
+  - image_templates:
+      - 'pixelfactory/needle:{{ .Tag }}-arm64'
+    dockerfile: Dockerfile
+    use_buildx: true
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source={{.GitURL}}"
+      - "--platform=linux/arm64"
+    goarch: arm64
+
+docker_manifests:
+  - name_template: 'pixelfactory/needle:{{ .Tag }}'
+    image_templates:
+      - 'pixelfactory/needle:{{ .Tag }}-amd64'
+      - 'pixelfactory/needle:{{ .Tag }}-arm64'
+  - name_template: 'pixelfactory/needle:latest'
+    image_templates:
+      - 'pixelfactory/needle:{{ .Tag }}-amd64'
+      - 'pixelfactory/needle:{{ .Tag }}-arm64'
+
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     replacements:
