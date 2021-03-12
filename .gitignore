@@ -15,7 +15,7 @@
 # vendor/
 
 data
-testdata
+testdata/certs
 needle
 coverage.*
 bin/needle

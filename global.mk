@@ -8,13 +8,3 @@ ifdef SOURCE_DATE_EPOCH
 else
     BUILD_DATE ?= $(shell date "$(DATE_FMT)")
 endif
-
-ifndef CGO_CPPFLAGS
-    export CGO_CPPFLAGS := $(CPPFLAGS)
-endif
-ifndef CGO_CFLAGS
-    export CGO_CFLAGS := $(CFLAGS)
-endif
-ifndef CGO_LDFLAGS
-    export CGO_LDFLAGS := $(LDFLAGS)
-endif

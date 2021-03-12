@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"crypto/tls"
-	"fmt"
-	"net/url"
 
 	"github.com/pkg/errors"
 	"go.pixelfactory.io/pkg/observability/log"
@@ -18,11 +16,9 @@ type CertificateHandlerFunc func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 // NewTLSHandler creates tlsHandler
 func NewTLSHandler(logger log.Logger, certificateService pki.CertificateService) CertificateHandlerFunc {
 	return func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
-		logger.Debug("Getting certificate",
-			fields.String("ServerName", helloInfo.ServerName), fields.String("LocalAddr", helloInfo.Conn.LocalAddr().String()),
-		)
+		logger.Debug("Getting certificate", fields.String("ServerName", helloInfo.ServerName))
 
-		name := getHostIP(helloInfo.Conn.LocalAddr().String())
+		name := "default-needle-certificate"
 		if len(helloInfo.ServerName) > 0 {
 			name = helloInfo.ServerName
 		}
@@ -43,12 +39,4 @@ func NewTLSHandler(logger log.Logger, certificateService pki.CertificateService)
 
 		return &tlsCert, nil
 	}
-}
-
-func getHostIP(localAddr string) string {
-	u, err := url.Parse(fmt.Sprintf("https://%s", localAddr))
-	if err != nil {
-		return ""
-	}
-	return u.Hostname()
 }

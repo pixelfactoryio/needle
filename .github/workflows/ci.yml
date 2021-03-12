@@ -26,6 +26,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
+      - name: Install dependencies
+        run: |
+          wget https://github.com/smallstep/cli/releases/download/v0.15.2/step-cli_0.15.2_amd64.deb
+          sudo dpkg -i step-cli_0.15.2_amd64.deb
+
       - name: Run go fmt
         if: runner.os != 'Windows'
         run: diff -u <(echo -n) <(gofmt -d -s .)
