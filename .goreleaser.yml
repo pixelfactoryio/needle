@@ -52,7 +52,7 @@ dockers:
   - image_templates:
       - 'pixelfactory/needle:{{ .Tag }}-amd64'
     dockerfile: Dockerfile
-    use_buildx: true
+    use: buildx
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -64,7 +64,7 @@ dockers:
   - image_templates:
       - 'pixelfactory/needle:{{ .Tag }}-arm64'
     dockerfile: Dockerfile
-    use_buildx: true
+    use: buildx
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -99,3 +99,15 @@ archives:
     files:
       - LICENSE
       - README.md
+
+brews:
+  - tap:
+      owner: pixelfactoryio
+      name: homebrew-tools
+    commit_author:
+      name: amine7536
+      email: amine@pixelfactory.io
+    homepage: https://github.com/pixelfactoryio/needle
+    description: "Small HTTP/1.1, HTTP/2, server with TLS support, that block ads and trackers."
+    license: "MIT"
+    skip_upload: auto
