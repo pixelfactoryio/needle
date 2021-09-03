@@ -104,6 +104,7 @@ brews:
   - tap:
       owner: pixelfactoryio
       name: homebrew-tools
+      token: "{{ .Env.GORELEASER_GITHUB_TOKEN }}"
     commit_author:
       name: amine7536
       email: amine@pixelfactory.io
