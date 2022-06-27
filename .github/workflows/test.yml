@@ -12,12 +12,12 @@ jobs:
       - run: |
           wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.20.0/step-cli_0.20.0_amd64.deb
           sudo dpkg -i /tmp/step-cli_0.20.0_amd64.deb
-      - uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+      # - uses: actions/cache@v3
+      #   with:
+      #     path: ~/go/pkg/mod
+      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-go-
 
       - name: Run gofmt
         run: make gofmt
