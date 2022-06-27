@@ -1,0 +1,36 @@
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18.x
+      - run: |
+          wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.20.0/step-cli_0.20.0_amd64.deb
+          sudo dpkg -i /tmp/step-cli_0.20.0_amd64.deb
+      - uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Run gofmt
+        run: make gofmt
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.42
+
+      - name: Run go test
+        run: make ca-test cert-test test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
