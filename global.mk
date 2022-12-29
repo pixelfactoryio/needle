@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 BUILD_FILES = $(shell go list -f '{{range .GoFiles}}{{$$.Dir}}/{{.}}\
 {{end}}' ./...)
 

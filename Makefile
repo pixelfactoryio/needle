@@ -19,6 +19,10 @@ vet:
 	@go vet ./...
 .PHONY: vet
 
+gofmt:
+	@diff -u <(echo -n) <(gofmt -d -s .)
+.PHONY: gofmt
+
 mocks:
 	@mockery --name=CertificateService --outpkg pkimock --dir internal/services/pki/ --output mocks/pkimock/ --case snake
 	@mockery --name=CertificateFactory --outpkg pkimock --dir internal/services/pki/ --output mocks/pkimock/ --case snake
