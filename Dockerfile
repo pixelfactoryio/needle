@@ -1,4 +1,4 @@
-FROM alpine:3.13
+FROM alpine:3.19
 
 COPY needle_*.apk /tmp/
 
