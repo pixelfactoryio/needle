@@ -1,3 +1,4 @@
+// Package api provides HTTP api and Route.
 package api
 
 import (

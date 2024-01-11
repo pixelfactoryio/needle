@@ -1,9 +1,9 @@
 package handlers_test
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -41,7 +41,7 @@ func Test_CAHandler(t *testing.T) {
 	handler := handlers.NewCAHandler(testdata.Dir() + "/certs/root-ca.crt")
 	handler.ServeHTTP(rr, req)
 
-	ca, err := ioutil.ReadFile(testdata.Dir() + "/certs/root-ca.crt")
+	ca, err := os.ReadFile(testdata.Dir() + "/certs/root-ca.crt")
 	if err != nil {
 		t.Fatal(err)
 	}

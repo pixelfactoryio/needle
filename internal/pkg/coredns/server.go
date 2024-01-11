@@ -1,3 +1,4 @@
+// Package coredns provides a DNS server implementation using CoreDNS.
 package coredns
 
 import (
@@ -92,7 +93,6 @@ func (s *DNSServer) Run() {
 
 // defaultLoader loads the CoreDNS configuration.
 func (s *DNSServer) defaultLoader(serverType string) (caddy.Input, error) {
-
 	return caddy.CaddyfileInput{
 		Contents:       s.renderCorefile(),
 		ServerTypeName: serverType,
@@ -100,7 +100,6 @@ func (s *DNSServer) defaultLoader(serverType string) (caddy.Input, error) {
 }
 
 func (s *DNSServer) renderCorefile() []byte {
-
 	corefileTpl := `
 	.:{{.Port}} {
 		hosts {{.Hosts}} {
