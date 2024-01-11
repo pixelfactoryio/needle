@@ -4,12 +4,10 @@ run:
   issues-exit-code: 1
   tests: true
 
-
 output:
   format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
-
 
 linters-settings:
   errcheck:
@@ -51,12 +49,9 @@ linters:
     - govet
     - errcheck
     - gas
-    - structcheck
-    - varcheck
     - ineffassign
-    - deadcode
     - typecheck
-    - golint
+    - revive
     - gosec
     - unconvert
     - gocyclo
@@ -79,8 +74,5 @@ linters:
     - gochecknoglobals
   disable-all: false
 
-
 issues:
   exclude-use-default: false
-  max-per-linter: 1024
-  max-same: 1024

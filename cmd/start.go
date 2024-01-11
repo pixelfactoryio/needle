@@ -18,17 +18,19 @@ import (
 	"go.pixelfactory.io/needle/internal/services/pki"
 )
 
-var caFile string
-var caKeyFile string
-var dbFile string
-var httpPort string
-var httpsPort string
-var httpServerTimeout time.Duration
-var httpServerShutdownTimeout time.Duration
-var corednsEnabled bool
-var corednsPort int
-var corednsHostsFile string
-var corednsUpstreams []string
+var (
+	caFile                    string
+	caKeyFile                 string
+	dbFile                    string
+	httpPort                  string
+	httpsPort                 string
+	httpServerTimeout         time.Duration
+	httpServerShutdownTimeout time.Duration
+	corednsEnabled            bool
+	corednsPort               int
+	corednsHostsFile          string
+	corednsUpstreams          []string
+)
 
 var startCmd = &cobra.Command{
 	Use:   "start",
@@ -39,7 +41,6 @@ var startCmd = &cobra.Command{
 // NewStartCmd command topic
 // nolint
 func NewStartCmd() (*cobra.Command, error) {
-
 	startCmd.PersistentFlags().StringVar(&caFile, "ca", "data/certs/root-ca.crt", "Root CA Certificate path")
 	if err := bindFlag("ca"); err != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func NewStartCmd() (*cobra.Command, error) {
 	return startCmd, nil
 }
 
-func start(c *cobra.Command, args []string) error {
+func start(_ *cobra.Command, _ []string) error {
 	// Setup logger
 	logger := log.New(log.WithLevel(logLevel))
 	logger = logger.With(fields.Service("needle", version.REVISION))
@@ -185,7 +186,6 @@ func start(c *cobra.Command, args []string) error {
 		server.WithHTTPServerShutdownTimeout(httpServerShutdownTimeout),
 		server.WithTLSConfig(tlsConfig),
 	)
-
 	if err != nil {
 		return err
 	}

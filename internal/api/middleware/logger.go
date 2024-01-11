@@ -1,3 +1,4 @@
+// Package middleware provides HTTP middleware functions for logging and observability.
 package middleware
 
 import (
