@@ -1,3 +1,4 @@
+// Package pki provides certificate factory.
 package pki
 
 import (

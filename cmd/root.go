@@ -1,3 +1,4 @@
+// Package cmd provides root command and subcommands.
 package cmd
 
 import (
@@ -9,8 +10,10 @@ import (
 	"go.pixelfactory.io/pkg/version"
 )
 
-var envPrefix = "NEEDLE"
-var logLevel string
+var (
+	envPrefix = "NEEDLE"
+	logLevel  string
+)
 
 var rootCmd = &cobra.Command{
 	Use:           "needle",

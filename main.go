@@ -1,3 +1,4 @@
+// Package main provides entrypoint for needle.
 package main
 
 import (

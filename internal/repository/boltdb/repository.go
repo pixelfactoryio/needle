@@ -1,3 +1,4 @@
+// Package boltdb provides BoltDB repository.
 package boltdb
 
 import (

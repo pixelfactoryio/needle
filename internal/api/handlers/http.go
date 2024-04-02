@@ -1,3 +1,4 @@
+// Package handlers provides http handlers.
 package handlers
 
 import (
@@ -23,7 +24,7 @@ func NewDefaultHandler() http.Handler {
 }
 
 // ServeHTTP respond with 1x1 transparent gif
-func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *httpHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "image/gif")
 	w.Header().Set("Content-Length", fmt.Sprint(len(Pixel)))
 	w.Header().Set("Accept-Ranges", "bytes")
@@ -32,7 +33,6 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-
 }
 
 // NewCAHandler create NewCAHandler
