@@ -14,22 +14,22 @@ import (
 	"time"
 )
 
-// CertificateFactory interface
+// CertificateFactory interface.
 type CertificateFactory interface {
 	Create(name string) (*Certificate, error)
 }
 
-// Factory represents the certificate factory
+// Factory represents the certificate factory.
 type Factory struct {
 	rootCA tls.Certificate
 }
 
-// NewFactory create certificateFactory
+// NewFactory create certificateFactory.
 func NewFactory(rootCA tls.Certificate) *Factory {
 	return &Factory{rootCA: rootCA}
 }
 
-// Create creates certificate
+// Create creates certificate.
 func (f *Factory) Create(name string) (*Certificate, error) {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
@@ -37,7 +37,7 @@ func (f *Factory) Create(name string) (*Certificate, error) {
 		return nil, err
 	}
 
-	// Try to parse name as IP
+	// Try to parse name as IP.
 	IPAddresses := []net.IP{net.ParseIP("0.0.0.0"), net.ParseIP("127.0.0.1")}
 	if ip := net.ParseIP(name); ip != nil {
 		IPAddresses = append(IPAddresses, ip)

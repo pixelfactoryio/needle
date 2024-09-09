@@ -6,18 +6,15 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-go@v3
         with:
           go-version: 1.21.x
-      - run: |
+
+      - name: Install step-cli
+        run: |
           wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.25.1/step-cli_0.25.1_amd64.deb
           sudo dpkg -i /tmp/step-cli_0.25.1_amd64.deb
-      # - uses: actions/cache@v3
-      #   with:
-      #     path: ~/go/pkg/mod
-      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-go-
 
       - name: Run gofmt
         run: make gofmt

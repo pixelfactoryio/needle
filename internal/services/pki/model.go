@@ -1,6 +1,6 @@
 package pki
 
-// Certificate represents a certificate
+// Certificate represents a certificate.
 type Certificate struct {
 	Name      string `json:"name" storm:"id"`
 	CertPEM   []byte `json:"cert_pem"`

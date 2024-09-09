@@ -10,16 +10,16 @@ import (
 	"go.pixelfactory.io/needle/internal/services/pki"
 )
 
-// CertificateHandlerFunc returns a Certificate based on the given ClientHelloInfo
+// CertificateHandlerFunc returns a Certificate based on the given ClientHelloInfo.
 type CertificateHandlerFunc func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 
-// NewTLSHandler creates tlsHandler
+// NewTLSHandler creates tlsHandler.
 func NewTLSHandler(logger log.Logger, certificateService pki.CertificateService) CertificateHandlerFunc {
 	return func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
 		logger.Debug("Getting certificate", fields.String("ServerName", helloInfo.ServerName))
 
 		name := "default-needle-certificate"
-		if len(helloInfo.ServerName) > 0 {
+		if helloInfo.ServerName != "" {
 			name = helloInfo.ServerName
 		}
 

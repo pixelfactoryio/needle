@@ -11,7 +11,7 @@ type boltRepository struct {
 	client *storm.DB
 }
 
-// NewBoltRepository create BoltDB backed CertificateRepository
+// NewBoltRepository create BoltDB backed CertificateRepository.
 func NewBoltRepository(client *storm.DB) pki.CertificateRepository {
 	repo := &boltRepository{
 		client: client,
@@ -19,11 +19,11 @@ func NewBoltRepository(client *storm.DB) pki.CertificateRepository {
 	return repo
 }
 
-// Get certificate in data/cache.db
+// Get certificate in data/cache.db.
 func (br *boltRepository) Get(name string) (*pki.Certificate, error) {
 	var cert pki.Certificate
 	err := br.client.One("Name", name, &cert)
-	if err == storm.ErrNotFound {
+	if errors.Is(err, storm.ErrNotFound) {
 		return nil, errors.Wrap(pki.ErrCertificateNotFound, "repository.BoltRepository.Find")
 	}
 	if err != nil {
@@ -32,7 +32,7 @@ func (br *boltRepository) Get(name string) (*pki.Certificate, error) {
 	return &cert, nil
 }
 
-// Store certificate in data/cache.db
+// Store certificate in data/cache.db.
 func (br *boltRepository) Store(certificate *pki.Certificate) error {
 	err := br.client.Save(certificate)
 	if err != nil {
