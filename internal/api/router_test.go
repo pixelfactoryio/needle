@@ -11,7 +11,6 @@ import (
 )
 
 func TestNewRouter(t *testing.T) {
-	t.Parallel()
 	is := require.New(t)
 
 	routes := []api.Route{

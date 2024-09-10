@@ -3,21 +3,18 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-go@v3
         with:
           go-version: 1.21.x
-      - run: |
-          wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.25.1/step-cli_0.25.1_amd64.deb
-          sudo dpkg -i /tmp/step-cli_0.25.1_amd64.deb
-      # - uses: actions/cache@v3
-      #   with:
-      #     path: ~/go/pkg/mod
-      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-go-
+
+      - name: Install step-cli
+        run: |
+          wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.27.2/step-cli_0.27.2_amd64.deb
+          sudo dpkg -i /tmp/step-cli_0.27.2_amd64.deb
 
       - name: Run gofmt
         run: make gofmt
@@ -28,7 +25,8 @@ jobs:
       - name: Run go test
         run: make ca-test cert-test test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

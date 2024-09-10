@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:  true,
 }
 
-// NewRootCmd create new rootCmd
+// NewRootCmd create new rootCmd.
 func NewRootCmd() (*cobra.Command, error) {
 	rootCmd.PersistentFlags().StringVar(
 		&logLevel,

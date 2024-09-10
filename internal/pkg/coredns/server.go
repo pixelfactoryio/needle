@@ -11,7 +11,7 @@ import (
 	"go.pixelfactory.io/pkg/observability/log/fields"
 )
 
-// DNSServer holds dns server
+// DNSServer holds dns server.
 type DNSServer struct {
 	name      string
 	port      int
@@ -20,38 +20,38 @@ type DNSServer struct {
 	logger    log.Logger
 }
 
-// Option type
+// Option type.
 type Option func(*DNSServer)
 
-// WithLogger set server logger
+// WithLogger set server logger.
 func WithLogger(l log.Logger) Option {
 	return func(s *DNSServer) {
 		s.logger = l
 	}
 }
 
-// WithPort set server port
+// WithPort set server port.
 func WithPort(p int) Option {
 	return func(s *DNSServer) {
 		s.port = p
 	}
 }
 
-// WithHostsFile set hosts file
+// WithHostsFile set hosts file.
 func WithHostsFile(h string) Option {
 	return func(s *DNSServer) {
 		s.hostsfile = h
 	}
 }
 
-// WithUpstreams set upstream dns servers
+// WithUpstreams set upstream dns servers.
 func WithUpstreams(u []string) Option {
 	return func(s *DNSServer) {
 		s.upsteams = u
 	}
 }
 
-// NewCoreDNSServer create new DNSServer with default values
+// NewCoreDNSServer create new DNSServer with default values.
 func NewCoreDNSServer(opts ...Option) *DNSServer {
 	srv := &DNSServer{
 		name:      "coredns",
@@ -77,7 +77,7 @@ func NewCoreDNSServer(opts ...Option) *DNSServer {
 	return srv
 }
 
-// Run CoreDNS
+// Run CoreDNS.
 func (s *DNSServer) Run() {
 	corefile, err := caddy.LoadCaddyfile("dns")
 	if err != nil {

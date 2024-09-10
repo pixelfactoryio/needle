@@ -11,7 +11,6 @@ import (
 )
 
 func Test_NewCertificateService(t *testing.T) {
-	t.Parallel()
 	is := require.New(t)
 
 	factory := &pkimock.CertificateFactory{}
@@ -22,7 +21,6 @@ func Test_NewCertificateService(t *testing.T) {
 }
 
 func Test_GetOrCreate(t *testing.T) {
-	t.Parallel()
 	is := require.New(t)
 
 	_, testCert := testdata.Setup(t)
@@ -30,7 +28,7 @@ func Test_GetOrCreate(t *testing.T) {
 	factory := &pkimock.CertificateFactory{}
 	svc := pki.NewCertificateService(repo, factory)
 
-	t.Run("Create certificate", func(t *testing.T) {
+	t.Run("Create certificate", func(_ *testing.T) {
 		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
 		factory.On("Create", "test.needle.local").Return(testCert, nil).Once()
 		repo.On("Store", testCert).Return(nil).Once()
@@ -42,7 +40,7 @@ func Test_GetOrCreate(t *testing.T) {
 		factory.AssertExpectations(t)
 	})
 
-	t.Run("Get certificate", func(t *testing.T) {
+	t.Run("Get certificate", func(_ *testing.T) {
 		repo.On("Get", "test.needle.local").Return(testCert, nil).Once()
 
 		cert, err := svc.GetOrCreate("test.needle.local")
@@ -54,7 +52,7 @@ func Test_GetOrCreate(t *testing.T) {
 		repo.AssertExpectations(t)
 	})
 
-	t.Run("Get certificate create error", func(t *testing.T) {
+	t.Run("Get certificate create error", func(_ *testing.T) {
 		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
 		factory.On("Create", "test.needle.local").Return(nil, errors.New("unable to create certificate")).Once()
 
@@ -65,7 +63,7 @@ func Test_GetOrCreate(t *testing.T) {
 		factory.AssertExpectations(t)
 	})
 
-	t.Run("Get certificate store error", func(t *testing.T) {
+	t.Run("Get certificate store error", func(_ *testing.T) {
 		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
 		factory.On("Create", "test.needle.local").Return(testCert, nil).Once()
 		repo.On("Store", testCert).Return(errors.New("unable to store certificate")).Once()

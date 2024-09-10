@@ -10,13 +10,13 @@ import (
 	"go.pixelfactory.io/needle/internal/api/middleware"
 )
 
-// Route holds path and http.Handler
+// Route holds path and http.Handler.
 type Route struct {
 	Path    string
 	Handler http.Handler
 }
 
-// NewRouter create router, setup routes and middlewares
+// NewRouter create router, setup routes and middlewares.
 func NewRouter(logger log.Logger, routes ...Route) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.Logging(logger))

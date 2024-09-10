@@ -38,8 +38,7 @@ var startCmd = &cobra.Command{
 	RunE:  start,
 }
 
-// NewStartCmd command topic
-// nolint
+// NewStartCmd create new startCmd.
 func NewStartCmd() (*cobra.Command, error) {
 	startCmd.PersistentFlags().StringVar(&caFile, "ca", "data/certs/root-ca.crt", "Root CA Certificate path")
 	if err := bindFlag("ca"); err != nil {
@@ -192,17 +191,17 @@ func start(_ *cobra.Command, _ []string) error {
 	// Start TLS Server
 	go tlsSrv.ListenAndServe()
 
-	httpSrv, _ := server.NewServer(
+	httpSrv, err := server.NewServer(
 		server.WithLogger(logger),
 		server.WithRouter(router),
 		server.WithPort(httpPort),
 		server.WithHTTPServerTimeout(httpServerTimeout),
 		server.WithHTTPServerShutdownTimeout(httpServerShutdownTimeout),
 	)
-
 	if err != nil {
 		return err
 	}
+
 	// Start HTTP Server
 	httpSrv.ListenAndServe()
 

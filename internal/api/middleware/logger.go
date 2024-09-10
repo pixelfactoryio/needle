@@ -52,8 +52,15 @@ func Logging(logger log.Logger) func(http.Handler) http.Handler {
 			wrapped := wrapResponseWriter(w)
 			next.ServeHTTP(wrapped, r)
 
-			ip, portStr, _ := net.SplitHostPort(r.RemoteAddr)
-			port, _ := strconv.Atoi(portStr)
+			ip, portStr, err := net.SplitHostPort(r.RemoteAddr)
+			if err != nil {
+				logger.Error("Unable to parse remote address", fields.String("remote_addr", r.RemoteAddr), fields.Error(err))
+			}
+
+			port, err := strconv.Atoi(portStr)
+			if err != nil {
+				logger.Error("Unable to parse remote port", fields.String("remote_port", portStr), fields.Error(err))
+			}
 
 			logger.Debug(
 				"Request",

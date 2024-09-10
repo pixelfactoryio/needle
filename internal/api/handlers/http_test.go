@@ -1,6 +1,7 @@
 package handlers_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -13,10 +14,9 @@ import (
 )
 
 func Test_DefaultHandler(t *testing.T) {
-	t.Parallel()
 	is := require.New(t)
 
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,10 +30,9 @@ func Test_DefaultHandler(t *testing.T) {
 }
 
 func Test_CAHandler(t *testing.T) {
-	t.Parallel()
 	is := require.New(t)
 
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
 	if err != nil {
 		t.Fatal(err)
 	}
