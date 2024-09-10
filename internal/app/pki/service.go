@@ -7,19 +7,25 @@ import (
 // ErrCertificateNotFound unable to find certificate.
 var ErrCertificateNotFound = errors.New("Certificate Not Found")
 
-// CertificateService the necessary functionality required by service to perform operation.
-type CertificateService interface {
-	GetOrCreate(name string) (*Certificate, error)
+// Factory interface.
+type Factory interface {
+	Create(name string) (*InternalCert, error)
+}
+
+// Repository interface.
+type Repository interface {
+	Get(name string) (*InternalCert, error)
+	Store(certificate *InternalCert) error
 }
 
 // Service represents a Certificate service.
 type Service struct {
-	certRepo    CertificateRepository
-	certFactory CertificateFactory
+	certRepo    Repository
+	certFactory Factory
 }
 
-// NewCertificateService create new Certificate service.
-func NewCertificateService(certRepo CertificateRepository, certFactory CertificateFactory) *Service {
+// New create new service.
+func New(certRepo Repository, certFactory Factory) *Service {
 	return &Service{
 		certRepo:    certRepo,
 		certFactory: certFactory,
@@ -27,19 +33,19 @@ func NewCertificateService(certRepo CertificateRepository, certFactory Certifica
 }
 
 // GetOrCreate retrives or create a certificat for the given name.
-func (s *Service) GetOrCreate(name string) (*Certificate, error) {
-	var cert *Certificate
+func (s *Service) GetOrCreate(name string) (*InternalCert, error) {
+	var cert *InternalCert
 	cert, err := s.certRepo.Get(name)
 	if errors.Is(err, ErrCertificateNotFound) {
 		// Create new Certificate
 		cert, err = s.certFactory.Create(name)
 		if err != nil {
-			return nil, errors.Wrap(err, "pki.CertificateService.GetOrCreate")
+			return nil, errors.Wrap(err, "pki.Service.GetOrCreate")
 		}
 		// Store Certificate
 		err := s.certRepo.Store(cert)
 		if err != nil {
-			return nil, errors.Wrap(err, "pki.CertificateService.GetOrCreate")
+			return nil, errors.Wrap(err, "pki.Service.GetOrCreate")
 		}
 
 	}

@@ -1,4 +1,4 @@
-package pki_test
+package factory_test
 
 import (
 	"crypto/tls"
@@ -6,7 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.pixelfactory.io/needle/internal/services/pki"
+	"go.pixelfactory.io/needle/internal/app/factory"
+	"go.pixelfactory.io/needle/internal/app/pki"
 	"go.pixelfactory.io/needle/testdata"
 )
 
@@ -15,9 +16,9 @@ func Test_NewFactory(t *testing.T) {
 
 	rootCA, _ := testdata.Setup(t)
 
-	certFactory := pki.NewFactory(rootCA)
+	certFactory := factory.New(rootCA)
 	is.NotEmpty(certFactory)
-	is.Implements((*pki.CertificateFactory)(nil), certFactory)
+	is.Implements((*pki.Factory)(nil), certFactory)
 }
 
 func Test_Create(t *testing.T) {
@@ -30,7 +31,7 @@ func Test_Create(t *testing.T) {
 	roots := x509.NewCertPool()
 	roots.AddCert(x509CACert)
 
-	certFactory := pki.NewFactory(rootCA)
+	certFactory := factory.New(rootCA)
 
 	t.Run("Create certificate", func(_ *testing.T) {
 		// create certificate

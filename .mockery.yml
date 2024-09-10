@@ -1,0 +1,10 @@
+with-expecter: true
+dir: "mocks/{{.PackageName}}"
+outpkg: mocks
+filename: "{{.InterfaceNameSnake}}.go"
+mockname: "{{.InterfaceName}}"
+all: true
+packages:
+  go.pixelfactory.io/needle/internal/app/pki:
+  go.pixelfactory.io/needle/internal/app/factory:
+  go.pixelfactory.io/needle/internal/api/handlers:

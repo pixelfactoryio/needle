@@ -4,54 +4,24 @@ package cmd
 import (
 	"strings"
 
+	"github.com/asdine/storm/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"go.pixelfactory.io/pkg/version"
 )
 
-var (
-	envPrefix = "NEEDLE"
-	logLevel  string
-)
-
-var rootCmd = &cobra.Command{
-	Use:           "needle",
-	Short:         "needle",
-	SilenceErrors: true,
-	SilenceUsage:  true,
-}
-
-// NewRootCmd create new rootCmd.
-func NewRootCmd() (*cobra.Command, error) {
-	rootCmd.PersistentFlags().StringVar(
-		&logLevel,
-		"log-level",
-		"info",
-		"Log level (debug, info, warn, error, fatal, panic)",
-	)
-	if err := bindFlag("log-level"); err != nil {
-		return nil, err
-	}
-
-	return rootCmd, nil
-}
+var envPrefix = "NEEDLE"
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() error {
-	rootCmd, err := NewRootCmd()
+	needleCmd, err := NewNeedleCmd()
 	if err != nil {
 		return err
 	}
 
-	startCmd, err := NewStartCmd()
-	if err != nil {
-		return err
-	}
-
-	rootCmd.AddCommand(startCmd)
 	cobra.OnInitialize(initConfig)
-	return rootCmd.Execute()
+	return needleCmd.Execute()
 }
 
 func initConfig() {
@@ -62,9 +32,18 @@ func initConfig() {
 }
 
 func bindFlag(flag string) error {
-	err := viper.BindPFlag(flag, startCmd.PersistentFlags().Lookup(flag))
+	err := viper.BindPFlag(flag, needleCmd.PersistentFlags().Lookup(flag))
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+func newStormClient(dbFile string) (*storm.DB, error) {
+	client, err := storm.Open(dbFile)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }

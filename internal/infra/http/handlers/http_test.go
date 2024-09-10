@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"go.pixelfactory.io/needle/internal/api/handlers"
+	"go.pixelfactory.io/needle/internal/infra/http/handlers"
 	"go.pixelfactory.io/needle/testdata"
 )
 

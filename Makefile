@@ -24,7 +24,5 @@ gofmt:
 .PHONY: gofmt
 
 mocks:
-	@mockery --name=CertificateService --outpkg pkimock --dir internal/services/pki/ --output mocks/pkimock/ --case snake
-	@mockery --name=CertificateFactory --outpkg pkimock --dir internal/services/pki/ --output mocks/pkimock/ --case snake
-	@mockery --name=CertificateRepository --outpkg pkimock --dir internal/services/pki/ --output mocks/pkimock/ --case snake
+	@mockery --log-level error
 .PHONY: mocks

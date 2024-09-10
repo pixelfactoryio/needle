@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.pixelfactory.io/needle/internal/api/handlers"
-	"go.pixelfactory.io/needle/internal/services/pki"
-	"go.pixelfactory.io/needle/mocks/pkimock"
+	"go.pixelfactory.io/needle/internal/app/pki"
+	"go.pixelfactory.io/needle/internal/infra/http/handlers"
+	mocks "go.pixelfactory.io/needle/mocks/handlers"
 	"go.pixelfactory.io/needle/testdata"
 	"go.pixelfactory.io/pkg/observability/log"
 )
@@ -25,7 +25,7 @@ func Test_TLSHandler(t *testing.T) {
 	roots := x509.NewCertPool()
 	roots.AddCert(x509CACert)
 
-	svc := &pkimock.CertificateService{}
+	svc := &mocks.PKIService{}
 	tlsHandler := handlers.NewTLSHandler(logger, svc)
 
 	is.NotEmpty(tlsHandler)
@@ -55,7 +55,7 @@ func Test_TLSHandler(t *testing.T) {
 	})
 
 	t.Run("Create certificate error empty certificate", func(_ *testing.T) {
-		svc.On("GetOrCreate", "test.needle.local").Return(&pki.Certificate{}, nil).Once()
+		svc.On("GetOrCreate", "test.needle.local").Return(&pki.InternalCert{}, nil).Once()
 
 		tlsCert, err := tlsHandler(&tls.ClientHelloInfo{ServerName: "test.needle.local"})
 		is.Error(err)

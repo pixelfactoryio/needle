@@ -1,5 +1,4 @@
-// Package pki provides certificate factory.
-package pki
+package factory
 
 import (
 	"bytes"
@@ -12,25 +11,22 @@ import (
 	"math/big"
 	"net"
 	"time"
-)
 
-// CertificateFactory interface.
-type CertificateFactory interface {
-	Create(name string) (*Certificate, error)
-}
+	"go.pixelfactory.io/needle/internal/app/pki"
+)
 
 // Factory represents the certificate factory.
 type Factory struct {
 	rootCA tls.Certificate
 }
 
-// NewFactory create certificateFactory.
-func NewFactory(rootCA tls.Certificate) *Factory {
+// New create certificateFactory.
+func New(rootCA tls.Certificate) *Factory {
 	return &Factory{rootCA: rootCA}
 }
 
-// Create creates certificate.
-func (f *Factory) Create(name string) (*Certificate, error) {
+// Create creates a certificate.
+func (f *Factory) Create(name string) (*pki.InternalCert, error) {
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
@@ -83,7 +79,7 @@ func (f *Factory) Create(name string) (*Certificate, error) {
 		return nil, err
 	}
 
-	return &Certificate{
+	return &pki.InternalCert{
 		Name:    name,
 		CertPEM: certPEM.Bytes(),
 		KeyPEM:  certPrivKeyPEM.Bytes(),

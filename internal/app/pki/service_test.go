@@ -5,28 +5,30 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"go.pixelfactory.io/needle/internal/services/pki"
-	"go.pixelfactory.io/needle/mocks/pkimock"
+	"go.pixelfactory.io/needle/internal/app/pki"
+	"go.pixelfactory.io/needle/internal/infra/http/handlers"
+	mocks "go.pixelfactory.io/needle/mocks/pki"
 	"go.pixelfactory.io/needle/testdata"
 )
 
 func Test_NewCertificateService(t *testing.T) {
 	is := require.New(t)
 
-	factory := &pkimock.CertificateFactory{}
-	repo := &pkimock.CertificateRepository{}
-	svc := pki.NewCertificateService(repo, factory)
+	factory := &mocks.Factory{}
+	repo := &mocks.Repository{}
+	svc := pki.New(repo, factory)
 	is.NotEmpty(svc)
-	is.Implements((*pki.CertificateService)(nil), svc)
+	is.Implements((*handlers.PKIService)(nil), svc)
 }
 
 func Test_GetOrCreate(t *testing.T) {
 	is := require.New(t)
 
 	_, testCert := testdata.Setup(t)
-	repo := &pkimock.CertificateRepository{}
-	factory := &pkimock.CertificateFactory{}
-	svc := pki.NewCertificateService(repo, factory)
+	factory := &mocks.Factory{}
+	repo := &mocks.Repository{}
+
+	svc := pki.New(repo, factory)
 
 	t.Run("Create certificate", func(_ *testing.T) {
 		repo.On("Get", "test.needle.local").Return(nil, pki.ErrCertificateNotFound).Once()
