@@ -1,5 +1,5 @@
 // Package api provides HTTP api and Route.
-package api
+package http
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 	"go.pixelfactory.io/pkg/observability/log"
 
 	"github.com/gorilla/mux"
-	"go.pixelfactory.io/needle/internal/api/middleware"
+	"go.pixelfactory.io/needle/internal/infra/http/middleware"
 )
 
 // Route holds path and http.Handler.

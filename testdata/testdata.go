@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	"go.pixelfactory.io/needle/internal/services/pki"
+	"go.pixelfactory.io/needle/internal/app/pki"
 )
 
 // Dir returns testdata path
@@ -16,7 +16,7 @@ func Dir() string {
 	return filepath.Dir(filename)
 }
 
-func Setup(t *testing.T) (tls.Certificate, *pki.Certificate) {
+func Setup(t *testing.T) (tls.Certificate, *pki.InternalCert) {
 	rootCA, err := tls.LoadX509KeyPair(
 		Dir()+"/certs/root-ca.crt",
 		Dir()+"/certs/root-ca.key",
@@ -35,7 +35,7 @@ func Setup(t *testing.T) (tls.Certificate, *pki.Certificate) {
 		t.Error("Unable to get keyPEM", err)
 	}
 
-	testCert := pki.Certificate{
+	testCert := pki.InternalCert{
 		Name:    "test.needle.local",
 		CertPEM: certPEM,
 		KeyPEM:  keyPEM,

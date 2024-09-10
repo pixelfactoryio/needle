@@ -1,7 +1,7 @@
 package pki
 
-// Certificate represents a certificate.
-type Certificate struct {
+// InternalCert represents a certificate.
+type InternalCert struct {
 	Name      string `json:"name" storm:"id"`
 	CertPEM   []byte `json:"cert_pem"`
 	KeyPEM    []byte `json:"key_pem"`
