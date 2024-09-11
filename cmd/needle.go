@@ -10,10 +10,10 @@ import (
 	"go.pixelfactory.io/pkg/server"
 	"go.pixelfactory.io/pkg/version"
 
-	"go.pixelfactory.io/needle/internal/app/coredns"
 	"go.pixelfactory.io/needle/internal/app/factory"
 	"go.pixelfactory.io/needle/internal/app/pki"
 	"go.pixelfactory.io/needle/internal/infra/boltdb"
+	"go.pixelfactory.io/needle/internal/infra/coredns"
 	"go.pixelfactory.io/needle/internal/infra/http"
 	"go.pixelfactory.io/needle/internal/infra/http/handlers"
 )
@@ -31,6 +31,7 @@ var (
 	corednsPort               int
 	corednsHostsFile          string
 	corednsUpstreams          []string
+	corednsCoreFile           string
 )
 
 var needleCmd = &cobra.Command{
@@ -103,6 +104,11 @@ func NewNeedleCmd() (*cobra.Command, error) {
 		return nil, err
 	}
 
+	needleCmd.PersistentFlags().StringVar(&corednsCoreFile, "coredns-corefile", "data/Corefile", "Corefile file path")
+	if err := bindFlag("coredns-corefile"); err != nil {
+		return nil, err
+	}
+
 	return needleCmd, nil
 }
 
@@ -117,9 +123,9 @@ func start(_ *cobra.Command, _ []string) error {
 		}
 	}()
 
-	logger.Debug("Application Start")
+	logger.Debug("Needle Start")
 	logger.Debug(
-		"Application Configuration",
+		"Needle Configuration",
 		fields.String("caFile", caFile),
 		fields.String("keyFile", caKeyFile),
 		fields.String("dbFile", dbFile),
@@ -131,11 +137,28 @@ func start(_ *cobra.Command, _ []string) error {
 
 	if corednsEnabled {
 		dnsServer := coredns.NewCoreDNSServer(
+			coredns.WithLogger(logger),
 			coredns.WithPort(corednsPort),
 			coredns.WithHostsFile(corednsHostsFile),
 			coredns.WithUpstreams(corednsUpstreams),
+			coredns.WithCoreFile(corednsCoreFile),
 		)
-		go dnsServer.Run()
+
+		// Start CoreDNS Server
+		go func() {
+			if err := dnsServer.Run(); err != nil {
+				logger.Error("failed to run CoreDNS server", fields.Error(err))
+			}
+		}()
+
+		logger.Debug("CoreDNS Server started")
+		logger.Debug(
+			"CoreDNS Configuration",
+			fields.Int("port", corednsPort),
+			fields.String("hostsfile", corednsHostsFile),
+			fields.Strings("upstreams", corednsUpstreams),
+			fields.String("corefile", corednsCoreFile),
+		)
 	}
 
 	// Setup tls certificate service
@@ -167,6 +190,7 @@ func start(_ *cobra.Command, _ []string) error {
 	tlsConfig := &tls.Config{
 		MinVersion:     tls.VersionTLS12,
 		GetCertificate: certHandler,
+		NextProtos:     []string{"h2", "http/1.1"},
 	}
 
 	// Setup http handler
@@ -184,6 +208,7 @@ func start(_ *cobra.Command, _ []string) error {
 	router := http.NewRouter(logger, routes...)
 
 	tlsSrv, err := server.NewServer(
+		server.WithName("needle-tls"),
 		server.WithLogger(logger),
 		server.WithRouter(router),
 		server.WithPort(httpsPort),
@@ -194,6 +219,7 @@ func start(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
+
 	// Start TLS Server
 	go func() {
 		err := tlsSrv.ListenAndServe()
@@ -203,6 +229,7 @@ func start(_ *cobra.Command, _ []string) error {
 	}()
 
 	httpSrv, err := server.NewServer(
+		server.WithName("needle-http"),
 		server.WithLogger(logger),
 		server.WithRouter(router),
 		server.WithPort(httpPort),

@@ -3,6 +3,7 @@ package coredns
 
 import (
 	"bytes"
+	"os"
 	"text/template"
 
 	"github.com/coredns/caddy"
@@ -16,6 +17,7 @@ type DNSServer struct {
 	name      string
 	port      int
 	hostsfile string
+	corefile  string
 	upsteams  []string
 	logger    log.Logger
 }
@@ -51,6 +53,13 @@ func WithUpstreams(u []string) Option {
 	}
 }
 
+// WithCoreFile set hosts file.
+func WithCoreFile(cf string) Option {
+	return func(s *DNSServer) {
+		s.corefile = cf
+	}
+}
+
 // NewCoreDNSServer create new DNSServer with default values.
 func NewCoreDNSServer(opts ...Option) *DNSServer {
 	srv := &DNSServer{
@@ -78,28 +87,47 @@ func NewCoreDNSServer(opts ...Option) *DNSServer {
 }
 
 // Run CoreDNS.
-func (s *DNSServer) Run() {
+func (s *DNSServer) Run() error {
 	corefile, err := caddy.LoadCaddyfile("dns")
 	if err != nil {
-		s.logger.Error("DNS Server crashed", fields.Error(err))
+		s.logger.Error("failed to initialize Corefile", fields.Error(err))
+		return err
 	}
 
 	instance, err := caddy.Start(corefile)
 	if err != nil {
 		s.logger.Error("DNS Server crashed", fields.Error(err))
+		return err
 	}
+
 	instance.Wait()
+	return nil
 }
 
 // defaultLoader loads the CoreDNS configuration.
 func (s *DNSServer) defaultLoader(serverType string) (caddy.Input, error) {
+	cf, err := s.renderCorefile()
+	if err != nil {
+		return nil, err
+	}
+
 	return caddy.CaddyfileInput{
-		Contents:       s.renderCorefile(),
+		Contents:       cf,
 		ServerTypeName: serverType,
 	}, nil
 }
 
-func (s *DNSServer) renderCorefile() []byte {
+func (s *DNSServer) renderCorefile() ([]byte, error) {
+	if s.corefile != "" {
+		cf, err := os.ReadFile(s.corefile)
+		if err != nil {
+			s.logger.Error("failed to read Corefile", fields.Error(err))
+			return nil, err
+		}
+
+		return cf, nil
+	}
+
 	corefileTpl := `
 	.:{{.Port}} {
 		hosts {{.Hosts}} {
@@ -123,13 +151,15 @@ func (s *DNSServer) renderCorefile() []byte {
 	tmpl, err := template.New("corefile").Parse(corefileTpl)
 	if err != nil {
 		s.logger.Error("DNS Server crashed", fields.Error(err))
+		return nil, err
 	}
 
 	var tpl bytes.Buffer
 	err = tmpl.Execute(&tpl, values)
 	if err != nil {
 		s.logger.Error("DNS Server crashed", fields.Error(err))
+		return nil, err
 	}
 
-	return tpl.Bytes()
+	return tpl.Bytes(), nil
 }
