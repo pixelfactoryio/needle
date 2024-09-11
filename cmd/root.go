@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"go.pixelfactory.io/needle/cmd/parse"
 	"go.pixelfactory.io/pkg/version"
 )
 
@@ -20,6 +21,12 @@ func Execute() error {
 		return err
 	}
 
+	parseHostCmd, err := parse.NewCmd()
+	if err != nil {
+		return err
+	}
+
+	needleCmd.AddCommand(parseHostCmd)
 	cobra.OnInitialize(initConfig)
 	return needleCmd.Execute()
 }

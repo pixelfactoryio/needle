@@ -207,7 +207,7 @@ func start(_ *cobra.Command, _ []string) error {
 
 	router := http.NewRouter(logger, routes...)
 
-	tlsSrv, err := server.NewServer(
+	tlsSrv, err := server.New(
 		server.WithName("needle-tls"),
 		server.WithLogger(logger),
 		server.WithRouter(router),
@@ -228,7 +228,7 @@ func start(_ *cobra.Command, _ []string) error {
 		}
 	}()
 
-	httpSrv, err := server.NewServer(
+	httpSrv, err := server.New(
 		server.WithName("needle-http"),
 		server.WithLogger(logger),
 		server.WithRouter(router),
