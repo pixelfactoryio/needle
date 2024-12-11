@@ -14,7 +14,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	go.pixelfactory.io/pkg/observability/log v1.3.0
-	go.pixelfactory.io/pkg/server v0.2.0
+	go.pixelfactory.io/pkg/server v0.3.0
 	go.pixelfactory.io/pkg/version v0.1.0
 )
 

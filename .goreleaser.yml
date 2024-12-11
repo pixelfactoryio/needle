@@ -1,42 +1,47 @@
+version: 2
+
 env:
   - GO111MODULE=on
 before:
   hooks:
     - go mod tidy
+
 builds:
-- env:
-    - CGO_ENABLED=0
-  goos:
-    - linux
-    - darwin
-    - windows
-  goarch:
-    - 386
-    - amd64
-    - arm
-    - arm64
-  mod_timestamp: '{{ .CommitTimestamp }}'
-  flags:
-    - -trimpath
-  ldflags:
-    - -s -w 
-    - -X go.pixelfactory.io/pkg/version.REVISION={{ .ShortCommit }} 
-    - -X go.pixelfactory.io/pkg/version.BUILDDATE={{ .CommitDate }}
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X go.pixelfactory.io/pkg/version.REVISION={{ .ShortCommit }}
+      - -X go.pixelfactory.io/pkg/version.BUILDDATE={{ .CommitDate }}
+
 checksum:
-  name_template: '{{ .ProjectName }}_checksums.txt'
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
 changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
-    - '^ci:'
-    - Merge pull request
-    - Merge branch
-    - go mod tidy
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+      - go mod tidy
 
 nfpms:
-  - file_name_template: '{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  - file_name_template: "{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     homepage: https://github.com/pixelfactoryio/needle
     description: |-
       Small HTTP/1.1, HTTP/2, server with TLS support, that block ads and trackers by reponsding to all requests with a transparent 1x1 gif pixel.
@@ -44,13 +49,13 @@ nfpms:
     license: MIT
     vendor: pixelfactory.io
     formats:
-    - apk
-    - deb
-    - rpm
+      - apk
+      - deb
+      - rpm
 
 dockers:
   - image_templates:
-      - 'pixelfactory/needle:{{ .Tag }}-amd64'
+      - "pixelfactory/needle:{{ .Tag }}-amd64"
     dockerfile: Dockerfile
     use: buildx
     build_flag_templates:
@@ -62,7 +67,7 @@ dockers:
       - "--label=org.opencontainers.image.source={{.GitURL}}"
       - "--platform=linux/amd64"
   - image_templates:
-      - 'pixelfactory/needle:{{ .Tag }}-arm64'
+      - "pixelfactory/needle:{{ .Tag }}-arm64"
     dockerfile: Dockerfile
     use: buildx
     build_flag_templates:
@@ -76,32 +81,33 @@ dockers:
     goarch: arm64
 
 docker_manifests:
-  - name_template: 'pixelfactory/needle:{{ .Tag }}'
+  - name_template: "pixelfactory/needle:{{ .Tag }}"
     image_templates:
-      - 'pixelfactory/needle:{{ .Tag }}-amd64'
-      - 'pixelfactory/needle:{{ .Tag }}-arm64'
-  - name_template: 'pixelfactory/needle:latest'
+      - "pixelfactory/needle:{{ .Tag }}-amd64"
+      - "pixelfactory/needle:{{ .Tag }}-arm64"
+  - name_template: "pixelfactory/needle:latest"
     image_templates:
-      - 'pixelfactory/needle:{{ .Tag }}-amd64'
-      - 'pixelfactory/needle:{{ .Tag }}-arm64'
+      - "pixelfactory/needle:{{ .Tag }}-amd64"
+      - "pixelfactory/needle:{{ .Tag }}-arm64"
 
 archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
-    - goos: windows
-      format: zip
+      - goos: windows
+        format: zip
     files:
       - LICENSE
       - README.md
 
 brews:
-  - tap:
+  - repository:
       owner: pixelfactoryio
       name: homebrew-tools
     commit_author:
