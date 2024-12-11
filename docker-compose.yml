@@ -1,0 +1,26 @@
+services:
+  needle:
+    image: pixelfactory/needle:v0.3.5-beta
+    ports:
+      - "80:80"
+      - "443:443"
+      - "53:53"
+      - "53:53/udp"
+    volumes:
+      - ./data:/data
+    command:
+      - --ca=/data/certs/root-ca.crt
+      - --ca-key=data/certs/root-ca.key
+      - --coredns
+      - --coredns-hosts-file=/data/hosts
+
+  parse:
+    image: pixelfactory/needle:v0.3.5-beta
+    volumes:
+      - ./data:/data
+    command:
+      - parse
+      - --file=http://sbc.io/hosts/hosts
+      - --public-ip=198.19.249.228
+      - --public-ip6=fd07:b51a:cc66:0:10a4:84ff:fea7:2b18
+      - --output=/data/hosts

@@ -141,7 +141,7 @@ func start(_ *cobra.Command, _ []string) error {
 			coredns.WithPort(corednsPort),
 			coredns.WithHostsFile(corednsHostsFile),
 			coredns.WithUpstreams(corednsUpstreams),
-			coredns.WithCoreFile(corednsCoreFile),
+			coredns.WithCoreFile(corednsCoreFile), // TODO: include only if flag is set
 		)
 
 		// Start CoreDNS Server
