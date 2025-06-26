@@ -1,8 +1,6 @@
 module go.pixelfactory.io/needle
 
-go 1.23
-
-toolchain go1.23.1
+go 1.24
 
 require (
 	github.com/asdine/storm/v3 v3.2.1
