@@ -153,6 +153,7 @@ func Test_Start_SuccessWithCoreDNS(t *testing.T) {
 	coreDNSServer.On("Run").Run(func(_ mock.Arguments) {
 		close(dnsCalled)
 	}).Return(nil)
+	coreDNSServer.On("Shutdown").Return(nil)
 
 	callCount := 0
 	newServerFunc = func(_ ...server.Option) (ServerRunner, error) {
@@ -234,10 +235,6 @@ func Test_Start_HTTPServerCreateError(t *testing.T) {
 	}
 
 	firstServer := mockscmd.NewServerRunner(t)
-	firstCalled := make(chan struct{})
-	firstServer.On("ListenAndServe").Run(func(_ mock.Arguments) {
-		close(firstCalled)
-	}).Return(nil)
 
 	callCount := 0
 	newServerFunc = func(_ ...server.Option) (ServerRunner, error) {
@@ -250,8 +247,6 @@ func Test_Start_HTTPServerCreateError(t *testing.T) {
 
 	err := start(nil, nil)
 	is.Error(err)
-
-	waitForSignal(t, firstCalled, "ListenAndServe (tls)")
 
 	mock.AssertExpectationsForObjects(t, firstServer)
 }

@@ -37,6 +37,24 @@ func (_m *CoreDNSServer) Run() error {
 	return r0
 }
 
+// Shutdown provides a mock function with given fields:
+func (_m *CoreDNSServer) Shutdown() error {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Shutdown")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CoreDNSServer_Run_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Run'
 type CoreDNSServer_Run_Call struct {
 	*mock.Call
@@ -60,6 +78,33 @@ func (_c *CoreDNSServer_Run_Call) Return(_a0 error) *CoreDNSServer_Run_Call {
 }
 
 func (_c *CoreDNSServer_Run_Call) RunAndReturn(run func() error) *CoreDNSServer_Run_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CoreDNSServer_Shutdown_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Shutdown'
+type CoreDNSServer_Shutdown_Call struct {
+	*mock.Call
+}
+
+// Shutdown is a helper method to define mock.On call
+func (_e *CoreDNSServer_Expecter) Shutdown() *CoreDNSServer_Shutdown_Call {
+	return &CoreDNSServer_Shutdown_Call{Call: _e.mock.On("Shutdown")}
+}
+
+func (_c *CoreDNSServer_Shutdown_Call) Run(run func()) *CoreDNSServer_Shutdown_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *CoreDNSServer_Shutdown_Call) Return(_a0 error) *CoreDNSServer_Shutdown_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *CoreDNSServer_Shutdown_Call) RunAndReturn(run func() error) *CoreDNSServer_Shutdown_Call {
 	_c.Call.Return(run)
 	return _c
 }

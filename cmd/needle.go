@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"crypto/tls"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -9,6 +10,7 @@ import (
 	"go.pixelfactory.io/pkg/observability/log/fields"
 	"go.pixelfactory.io/pkg/server"
 	"go.pixelfactory.io/pkg/version"
+	"golang.org/x/sync/errgroup"
 
 	"go.pixelfactory.io/needle/internal/app/factory"
 	"go.pixelfactory.io/needle/internal/app/pki"
@@ -36,10 +38,12 @@ var (
 
 type ServerRunner interface {
 	ListenAndServe() error
+	Shutdown()
 }
 
 type CoreDNSServer interface {
 	Run() error
+	Shutdown() error
 }
 
 var (
@@ -151,8 +155,9 @@ func start(_ *cobra.Command, _ []string) error {
 		fields.String("server-shutdown-timeout", httpServerShutdownTimeout.String()),
 	)
 
+	var dnsServer CoreDNSServer
 	if corednsEnabled {
-		dnsServer := newCoreDNSServerFunc(
+		dnsServer = newCoreDNSServerFunc(
 			coredns.WithLogger(logger),
 			coredns.WithPort(corednsPort),
 			coredns.WithHostsFile(corednsHostsFile),
@@ -160,14 +165,7 @@ func start(_ *cobra.Command, _ []string) error {
 			coredns.WithCoreFile(corednsCoreFile),
 		)
 
-		// Start CoreDNS Server
-		go func() {
-			if err := dnsServer.Run(); err != nil {
-				logger.Error("failed to run CoreDNS server", fields.Error(err))
-			}
-		}()
-
-		logger.Debug("CoreDNS Server started")
+		logger.Debug("CoreDNS Server initialized")
 		logger.Debug(
 			"CoreDNS Configuration",
 			fields.Int("port", corednsPort),
@@ -235,13 +233,6 @@ func start(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// Start TLS Server
-	go func() {
-		if serveErr := tlsSrv.ListenAndServe(); serveErr != nil {
-			logger.Error("TLS server failed to start", fields.Error(serveErr))
-		}
-	}()
-
 	httpSrv, err := newServerFunc(
 		server.WithName("needle-http"),
 		server.WithLogger(logger),
@@ -254,7 +245,57 @@ func start(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// Start HTTP Server
-	err = httpSrv.ListenAndServe()
-	return err
+	var shutdownServersOnce sync.Once
+	var shutdownDNSOnce sync.Once
+	shutdownServers := func() {
+		shutdownServersOnce.Do(func() {
+			httpSrv.Shutdown()
+		})
+	}
+	shutdownDNS := func() {
+		if dnsServer == nil {
+			return
+		}
+		shutdownDNSOnce.Do(func() {
+			if dnsErr := dnsServer.Shutdown(); dnsErr != nil {
+				logger.Error("failed to shutdown CoreDNS server", fields.Error(dnsErr))
+			}
+		})
+	}
+
+	var group errgroup.Group
+	if dnsServer != nil {
+		group.Go(func() error {
+			if dnsErr := dnsServer.Run(); dnsErr != nil {
+				logger.Error("failed to run CoreDNS server", fields.Error(dnsErr))
+				shutdownServers()
+				return dnsErr
+			}
+			return nil
+		})
+	}
+
+	group.Go(func() error {
+		if serveErr := tlsSrv.ListenAndServe(); serveErr != nil {
+			logger.Error("TLS server failed to start", fields.Error(serveErr))
+			shutdownServers()
+			shutdownDNS()
+			return serveErr
+		}
+		shutdownDNS()
+		return nil
+	})
+
+	group.Go(func() error {
+		if serveErr := httpSrv.ListenAndServe(); serveErr != nil {
+			logger.Error("HTTP server failed to start", fields.Error(serveErr))
+			shutdownServers()
+			shutdownDNS()
+			return serveErr
+		}
+		shutdownDNS()
+		return nil
+	})
+
+	return group.Wait()
 }

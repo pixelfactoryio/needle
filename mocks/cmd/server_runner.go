@@ -37,6 +37,11 @@ func (_m *ServerRunner) ListenAndServe() error {
 	return r0
 }
 
+// Shutdown provides a mock function with given fields:
+func (_m *ServerRunner) Shutdown() {
+	_m.Called()
+}
+
 // The following line is corrupted and needs to be removed.
 // It appears to be a concatenation of multiple lines that should not be here.
 
@@ -64,6 +69,28 @@ func (_c *ServerRunner_ListenAndServe_Call) Return(_a0 error) *ServerRunner_List
 
 func (_c *ServerRunner_ListenAndServe_Call) RunAndReturn(run func() error) *ServerRunner_ListenAndServe_Call {
 	_c.Call.Return(run)
+	return _c
+}
+
+// ServerRunner_Shutdown_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Shutdown'
+type ServerRunner_Shutdown_Call struct {
+	*mock.Call
+}
+
+// Shutdown is a helper method to define mock.On call
+func (_e *ServerRunner_Expecter) Shutdown() *ServerRunner_Shutdown_Call {
+	return &ServerRunner_Shutdown_Call{Call: _e.mock.On("Shutdown")}
+}
+
+func (_c *ServerRunner_Shutdown_Call) Run(run func()) *ServerRunner_Shutdown_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *ServerRunner_Shutdown_Call) Return() *ServerRunner_Shutdown_Call {
+	_c.Call.Return()
 	return _c
 }
 

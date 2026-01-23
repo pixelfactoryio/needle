@@ -158,6 +158,8 @@ go.pixelfactory.io/pkg/observability/log v1.4.3 h1:Nj6FZKPBiZ+zHm6PiN4JPs2RmioER
 go.pixelfactory.io/pkg/observability/log v1.4.3/go.mod h1:WlzGnw+4unH/K3JMP3D9rdCgnrnFQg86C9vi95EpKuc=
 go.pixelfactory.io/pkg/server v0.5.1 h1:uuZ7+/M/F51TtIul17YzPDF3YiXkyHngh2gzf1UmIQg=
 go.pixelfactory.io/pkg/server v0.5.1/go.mod h1:vrofVfJDtVcDiobe+rYd7S4n47Mx6jVDllsfdAqx+UA=
+go.pixelfactory.io/pkg/server v0.6.0 h1:j3t54PoA9avtV/fgoMyXB5hf/oPDonqkpkzGtn0mOCY=
+go.pixelfactory.io/pkg/server v0.6.0/go.mod h1:vrofVfJDtVcDiobe+rYd7S4n47Mx6jVDllsfdAqx+UA=
 go.pixelfactory.io/pkg/version v0.2.3 h1:FVqsXbo8qaX30g5ZeZa6ixgjAzBiNmok7G3JDVshU/U=
 go.pixelfactory.io/pkg/version v0.2.3/go.mod h1:pB11yth48U3BxUWY4R+I24A12EO5+03mve70c5EnTvc=
 go.uber.org/automaxprocs v1.6.0 h1:O3y2/QNTOdbF+e/dpXNNW7Rx2hZ4sTIPyybbxyNqTUs=

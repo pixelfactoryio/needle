@@ -4,6 +4,7 @@ package coredns
 import (
 	"bytes"
 	"os"
+	"sync"
 	"text/template"
 
 	"github.com/coredns/caddy"
@@ -14,12 +15,14 @@ import (
 
 // DNSServer holds dns server.
 type DNSServer struct {
-	name      string
-	port      int
-	hostsfile string
-	corefile  string
-	upsteams  []string
-	logger    log.Logger
+	name       string
+	port       int
+	hostsfile  string
+	corefile   string
+	upsteams   []string
+	logger     log.Logger
+	instance   *caddy.Instance
+	instanceMu sync.RWMutex
 }
 
 // Option type.
@@ -100,7 +103,28 @@ func (s *DNSServer) Run() error {
 		return err
 	}
 
+	s.instanceMu.Lock()
+	s.instance = instance
+	s.instanceMu.Unlock()
+
 	instance.Wait()
+	return nil
+}
+
+// Shutdown stops CoreDNS.
+func (s *DNSServer) Shutdown() error {
+	s.instanceMu.RLock()
+	instance := s.instance
+	s.instanceMu.RUnlock()
+	if instance == nil {
+		return nil
+	}
+
+	if err := instance.Stop(); err != nil {
+		s.logger.Error("failed to stop CoreDNS instance", fields.Error(err))
+		return err
+	}
+
 	return nil
 }
 
