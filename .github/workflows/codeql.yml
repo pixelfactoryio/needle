@@ -1,0 +1,73 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  schedule:
+    - cron: "0 0 * * 1" # Run every Monday at midnight
+
+permissions:
+  contents: read
+
+jobs:
+  pr-check:
+    name: Check for open PR
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      has_pr: ${{ steps.find-pr.outputs.has_pr }}
+    steps:
+      - name: Find open PR for branch
+        id: find-pr
+        uses: actions/github-script@v7.0.1
+        with:
+          script: |
+            const branch = context.ref.replace('refs/heads/', '');
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${context.repo.owner}:${branch}`,
+            });
+            core.setOutput('has_pr', prs.length > 0 ? 'true' : 'false');
+
+  analyze:
+    name: Analyze
+    needs: [pr-check]
+    if: github.event_name == 'pull_request' || needs.pr-check.outputs.has_pr != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: "go.mod"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4.31.10
+        with:
+          languages: go
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4.31.10
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4.31.10
+        with:
+          category: "/language:go"

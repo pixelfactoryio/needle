@@ -1,0 +1,26 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: read-all
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+        with:
+          token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+          release-type: go
