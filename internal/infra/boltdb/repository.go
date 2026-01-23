@@ -4,6 +4,7 @@ package boltdb
 import (
 	"github.com/asdine/storm/v3"
 	"github.com/pkg/errors"
+
 	"go.pixelfactory.io/needle/internal/app/pki"
 )
 

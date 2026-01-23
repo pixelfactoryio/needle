@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 
 	"github.com/pkg/errors"
-	"go.pixelfactory.io/needle/internal/app/pki"
 	"go.pixelfactory.io/pkg/observability/log"
 	"go.pixelfactory.io/pkg/observability/log/fields"
+
+	"go.pixelfactory.io/needle/internal/app/pki"
 )
 
 type PKIService interface {
@@ -28,14 +29,14 @@ func NewTLSHandler(logger log.Logger, pkiSvc PKIService) CertificateHandlerFunc 
 
 		certificate, err := pkiSvc.GetOrCreate(name)
 		if err != nil {
-			err := errors.Wrap(err, "api.CertificateHandler.Get")
+			err = errors.Wrap(err, "api.CertificateHandler.Get")
 			logger.Error("Unable to find certificate", fields.String("CommonName", name), fields.Error(err))
 			return nil, err
 		}
 
 		tlsCert, err := tls.X509KeyPair(certificate.CertPEM, certificate.KeyPEM)
 		if err != nil {
-			err := errors.Wrap(err, "api.CertificateHandler.Get")
+			err = errors.Wrap(err, "api.CertificateHandler.Get")
 			logger.Error("Error creating certificate", fields.String("CommonName", name), fields.Error(err))
 			return nil, err
 		}

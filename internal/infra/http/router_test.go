@@ -5,9 +5,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.pixelfactory.io/pkg/observability/log"
+
 	router "go.pixelfactory.io/needle/internal/infra/http"
 	"go.pixelfactory.io/needle/internal/infra/http/handlers"
-	"go.pixelfactory.io/pkg/observability/log"
 )
 
 func TestNewRouter(t *testing.T) {

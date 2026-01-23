@@ -15,13 +15,13 @@ var envPrefix = "NEEDLE"
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() error {
-	needleCmd, err := NewNeedleCmd()
+	cmd, err := NewNeedleCmd()
 	if err != nil {
 		return err
 	}
 
 	cobra.OnInitialize(initConfig)
-	return needleCmd.Execute()
+	return cmd.Execute()
 }
 
 func initConfig() {

@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    strategy:
+      matrix:
+        go-version: [1.25.x]
+        platform: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: read
+
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install step-cli (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          wget -q -P /tmp https://github.com/smallstep/cli/releases/download/v0.27.2/step-cli_0.27.2_amd64.deb
+          sudo dpkg -i /tmp/step-cli_0.27.2_amd64.deb
+
+      - name: Install step-cli (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $version = "0.27.2"
+          $url = "https://github.com/smallstep/cli/releases/download/v$version/step_windows_${version}_amd64.zip"
+          Invoke-WebRequest -Uri $url -OutFile step.zip
+          Expand-Archive -Path step.zip -DestinationPath .
+          Move-Item -Path "step_$version\bin\step.exe" -Destination "C:\Windows\System32\step.exe"
+        shell: powershell
+
+      - name: Run go fmt
+        if: runner.os != 'Windows'
+        run: make gofmt
+
+      - name: Run golangci-lint
+        if: runner.os != 'Windows' && matrix.go-version == '1.25.x'
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        with:
+          version: v2.8
+
+      - name: Run govulncheck
+        if: runner.os != 'Windows' && matrix.go-version == '1.25.x'
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
+          govulncheck ./...
+
+      - name: Run tests
+        run: make ca-test cert-test test
+
+      - name: Upload coverage
+        if: runner.os != 'Windows' && matrix.go-version == '1.25.x'
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Harden the runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version: 1.25.x
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

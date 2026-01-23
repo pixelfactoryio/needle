@@ -34,6 +34,21 @@ var (
 	corednsCoreFile           string
 )
 
+type ServerRunner interface {
+	ListenAndServe() error
+}
+
+type CoreDNSServer interface {
+	Run() error
+}
+
+var (
+	loadX509KeyPair      = tls.LoadX509KeyPair
+	newStormClientFunc   = newStormClient
+	newServerFunc        = func(opts ...server.Option) (ServerRunner, error) { return server.New(opts...) }
+	newCoreDNSServerFunc = func(opts ...coredns.Option) CoreDNSServer { return coredns.NewCoreDNSServer(opts...) }
+)
+
 var needleCmd = &cobra.Command{
 	Use:   "needle",
 	Short: "needle",
@@ -42,7 +57,8 @@ var needleCmd = &cobra.Command{
 
 // NewNeedleCmd create new needleCmd.
 func NewNeedleCmd() (*cobra.Command, error) {
-	needleCmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal, panic)")
+	needleCmd.PersistentFlags().
+		StringVar(&logLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal, panic)")
 	if err := bindFlag("log-level"); err != nil {
 		return nil, err
 	}
@@ -136,7 +152,7 @@ func start(_ *cobra.Command, _ []string) error {
 	)
 
 	if corednsEnabled {
-		dnsServer := coredns.NewCoreDNSServer(
+		dnsServer := newCoreDNSServerFunc(
 			coredns.WithLogger(logger),
 			coredns.WithPort(corednsPort),
 			coredns.WithHostsFile(corednsHostsFile),
@@ -162,20 +178,19 @@ func start(_ *cobra.Command, _ []string) error {
 	}
 
 	// Setup tls certificate service
-	rootCA, err := tls.LoadX509KeyPair(caFile, caKeyFile)
+	rootCA, err := loadX509KeyPair(caFile, caKeyFile)
 	if err != nil {
 		return err
 	}
 
 	// Setup BoltDB repository
-	client, err := newStormClient(dbFile)
+	client, err := newStormClientFunc(dbFile)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		err := client.Close()
-		if err != nil {
-			logger.Error("an error occurred while closing *storm.DB client", fields.Error(err))
+		if closeErr := client.Close(); closeErr != nil {
+			logger.Error("an error occurred while closing *storm.DB client", fields.Error(closeErr))
 		}
 	}()
 
@@ -207,7 +222,7 @@ func start(_ *cobra.Command, _ []string) error {
 
 	router := http.NewRouter(logger, routes...)
 
-	tlsSrv, err := server.NewServer(
+	tlsSrv, err := newServerFunc(
 		server.WithName("needle-tls"),
 		server.WithLogger(logger),
 		server.WithRouter(router),
@@ -222,13 +237,12 @@ func start(_ *cobra.Command, _ []string) error {
 
 	// Start TLS Server
 	go func() {
-		err := tlsSrv.ListenAndServe()
-		if err != nil {
-			logger.Error("TLS server failed to start", fields.Error(err))
+		if serveErr := tlsSrv.ListenAndServe(); serveErr != nil {
+			logger.Error("TLS server failed to start", fields.Error(serveErr))
 		}
 	}()
 
-	httpSrv, err := server.NewServer(
+	httpSrv, err := newServerFunc(
 		server.WithName("needle-http"),
 		server.WithLogger(logger),
 		server.WithRouter(router),
@@ -241,9 +255,6 @@ func start(_ *cobra.Command, _ []string) error {
 	}
 
 	// Start HTTP Server
-	if err := httpSrv.ListenAndServe(); err != nil {
-		return err
-	}
-
-	return nil
+	err = httpSrv.ListenAndServe()
+	return err
 }

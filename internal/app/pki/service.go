@@ -43,11 +43,10 @@ func (s *Service) GetOrCreate(name string) (*InternalCert, error) {
 			return nil, errors.Wrap(err, "pki.Service.GetOrCreate")
 		}
 		// Store Certificate
-		err := s.certRepo.Store(cert)
+		err = s.certRepo.Store(cert)
 		if err != nil {
 			return nil, errors.Wrap(err, "pki.Service.GetOrCreate")
 		}
-
 	}
 	return cert, nil
 }

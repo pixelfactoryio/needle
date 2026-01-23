@@ -17,9 +17,7 @@ func Test_DefaultHandler(t *testing.T) {
 	is := require.New(t)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
-	if err != nil {
-		t.Fatal(err)
-	}
+	is.NoError(err)
 
 	rr := httptest.NewRecorder()
 	handler := handlers.NewDefaultHandler()
@@ -33,17 +31,13 @@ func Test_CAHandler(t *testing.T) {
 	is := require.New(t)
 
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "/", http.NoBody)
-	if err != nil {
-		t.Fatal(err)
-	}
+	is.NoError(err)
 	rr := httptest.NewRecorder()
 	handler := handlers.NewCAHandler(testdata.Dir() + "/certs/root-ca.crt")
 	handler.ServeHTTP(rr, req)
 
 	ca, err := os.ReadFile(testdata.Dir() + "/certs/root-ca.crt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	is.NoError(err)
 
 	is.Equal(rr.Code, http.StatusOK)
 	is.Equal(rr.Body.Bytes(), ca)

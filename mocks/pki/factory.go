@@ -4,6 +4,7 @@ package mocks
 
 import (
 	mock "github.com/stretchr/testify/mock"
+
 	pki "go.pixelfactory.io/needle/internal/app/pki"
 )
 
