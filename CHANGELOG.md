@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/pixelfactoryio/needle/compare/v0.2.4...v0.3.0) (2026-01-23)
+
+
+### Features
+
+* **corefile:** support using custom Corefile ([#24](https://github.com/pixelfactoryio/needle/issues/24)) ([5d440ac](https://github.com/pixelfactoryio/needle/commit/5d440ac4faa0983ff1eb1468a98d34c9763ee34e))
+
+
+### Bug Fixes
+
+* Dockerfile to reduce vulnerabilities ([17ea8c0](https://github.com/pixelfactoryio/needle/commit/17ea8c08d43cc96d6b70e95b85f6c400ec68c19d))
+* update Alpine version in Dockerfile ([9960063](https://github.com/pixelfactoryio/needle/commit/996006355a8dc1c983fd678231f0abea5c22daa3))
+
 ## [Unreleased]
 
 ### Added
