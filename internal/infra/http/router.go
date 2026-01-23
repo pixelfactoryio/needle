@@ -7,6 +7,7 @@ import (
 	"go.pixelfactory.io/pkg/observability/log"
 
 	"github.com/gorilla/mux"
+
 	"go.pixelfactory.io/needle/internal/infra/http/middleware"
 )
 

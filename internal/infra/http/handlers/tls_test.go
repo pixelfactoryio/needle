@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.pixelfactory.io/pkg/observability/log"
+
 	"go.pixelfactory.io/needle/internal/app/pki"
 	"go.pixelfactory.io/needle/internal/infra/http/handlers"
 	mocks "go.pixelfactory.io/needle/mocks/handlers"
 	"go.pixelfactory.io/needle/testdata"
-	"go.pixelfactory.io/pkg/observability/log"
 )
 
 func Test_TLSHandler(t *testing.T) {
@@ -19,8 +20,8 @@ func Test_TLSHandler(t *testing.T) {
 	logger := log.New()
 
 	rootCA, testCert := testdata.Setup(t)
-	x509CACert, err := x509.ParseCertificate(rootCA.Certificate[0])
-	is.NoError(err)
+	x509CACert, parseErr := x509.ParseCertificate(rootCA.Certificate[0])
+	is.NoError(parseErr)
 
 	roots := x509.NewCertPool()
 	roots.AddCert(x509CACert)

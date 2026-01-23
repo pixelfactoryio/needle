@@ -15,6 +15,8 @@ import (
 	"go.pixelfactory.io/needle/internal/app/pki"
 )
 
+var pemEncode = pem.Encode
+
 // Factory represents the certificate factory.
 type Factory struct {
 	rootCA tls.Certificate
@@ -34,9 +36,9 @@ func (f *Factory) Create(name string) (*pki.InternalCert, error) {
 	}
 
 	// Try to parse name as IP.
-	IPAddresses := []net.IP{net.ParseIP("0.0.0.0"), net.ParseIP("127.0.0.1")}
+	ipAddresses := []net.IP{net.ParseIP("0.0.0.0"), net.ParseIP("127.0.0.1")}
 	if ip := net.ParseIP(name); ip != nil {
-		IPAddresses = append(IPAddresses, ip)
+		ipAddresses = append(ipAddresses, ip)
 	}
 
 	cert := &x509.Certificate{
@@ -49,7 +51,7 @@ func (f *Factory) Create(name string) (*pki.InternalCert, error) {
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:    x509.KeyUsageDigitalSignature,
 		DNSNames:    []string{"localhost", name},
-		IPAddresses: IPAddresses,
+		IPAddresses: ipAddresses,
 	}
 
 	certPrivKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -68,15 +70,15 @@ func (f *Factory) Create(name string) (*pki.InternalCert, error) {
 	}
 
 	certPEM := new(bytes.Buffer)
-	if err := pem.Encode(certPEM, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes}); err != nil {
-		return nil, err
+	if encodeErr := pemEncode(certPEM, &pem.Block{Type: "CERTIFICATE", Bytes: certBytes}); encodeErr != nil {
+		return nil, encodeErr
 	}
 
 	certPrivKeyPEM := new(bytes.Buffer)
-	if err := pem.Encode(
+	if encodeErr := pemEncode(
 		certPrivKeyPEM,
-		&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey)}); err != nil {
-		return nil, err
+		&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(certPrivKey)}); encodeErr != nil {
+		return nil, encodeErr
 	}
 
 	return &pki.InternalCert{

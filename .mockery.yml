@@ -5,6 +5,8 @@ filename: "{{.InterfaceNameSnake}}.go"
 mockname: "{{.InterfaceName}}"
 all: true
 packages:
+  go.pixelfactory.io/needle:
+  go.pixelfactory.io/needle/cmd:
   go.pixelfactory.io/needle/internal/app/pki:
   go.pixelfactory.io/needle/internal/app/factory:
   go.pixelfactory.io/needle/internal/api/handlers:

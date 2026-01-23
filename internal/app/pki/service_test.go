@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+
 	"go.pixelfactory.io/needle/internal/app/pki"
 	"go.pixelfactory.io/needle/internal/infra/http/handlers"
 	mocks "go.pixelfactory.io/needle/mocks/pki"
