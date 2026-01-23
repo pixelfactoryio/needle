@@ -38,7 +38,7 @@ jobs:
   analyze:
     name: Analyze
     needs: [pr-check]
-    if: github.event_name == 'pull_request' || needs.pr-check.outputs.has_pr != 'true'
+    if: ${{ always() && (github.event_name == 'pull_request' || needs.pr-check.outputs.has_pr != 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
