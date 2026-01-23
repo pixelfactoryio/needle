@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/asdine/storm/v3"
 	"github.com/spf13/cobra"
@@ -17,6 +18,16 @@ import (
 	"go.pixelfactory.io/needle/internal/infra/coredns"
 	mockscmd "go.pixelfactory.io/needle/mocks/cmd"
 )
+
+func waitForSignal(t *testing.T, ch <-chan struct{}, name string) {
+	t.Helper()
+	select {
+	case <-ch:
+		return
+	case <-time.After(1 * time.Second):
+		require.Fail(t, "timeout waiting for call", name)
+	}
+}
 
 func resetNeedleCmd() {
 	needleCmd = &cobra.Command{
@@ -129,9 +140,19 @@ func Test_Start_SuccessWithCoreDNS(t *testing.T) {
 	httpServer := mockscmd.NewServerRunner(t)
 	coreDNSServer := mockscmd.NewCoreDNSServer(t)
 
-	tlsServer.On("ListenAndServe").Return(nil)
-	httpServer.On("ListenAndServe").Return(nil)
-	coreDNSServer.On("Run").Return(nil)
+	tlsCalled := make(chan struct{})
+	httpCalled := make(chan struct{})
+	dnsCalled := make(chan struct{})
+
+	tlsServer.On("ListenAndServe").Run(func(_ mock.Arguments) {
+		close(tlsCalled)
+	}).Return(nil)
+	httpServer.On("ListenAndServe").Run(func(_ mock.Arguments) {
+		close(httpCalled)
+	}).Return(nil)
+	coreDNSServer.On("Run").Run(func(_ mock.Arguments) {
+		close(dnsCalled)
+	}).Return(nil)
 
 	callCount := 0
 	newServerFunc = func(_ ...server.Option) (ServerRunner, error) {
@@ -150,6 +171,10 @@ func Test_Start_SuccessWithCoreDNS(t *testing.T) {
 
 	err := start(nil, nil)
 	is.NoError(err)
+
+	waitForSignal(t, tlsCalled, "ListenAndServe (tls)")
+	waitForSignal(t, httpCalled, "ListenAndServe (http)")
+	waitForSignal(t, dnsCalled, "Run (coredns)")
 
 	mock.AssertExpectationsForObjects(t, tlsServer, httpServer, coreDNSServer)
 }
@@ -209,7 +234,10 @@ func Test_Start_HTTPServerCreateError(t *testing.T) {
 	}
 
 	firstServer := mockscmd.NewServerRunner(t)
-	firstServer.On("ListenAndServe").Return(nil)
+	firstCalled := make(chan struct{})
+	firstServer.On("ListenAndServe").Run(func(_ mock.Arguments) {
+		close(firstCalled)
+	}).Return(nil)
 
 	callCount := 0
 	newServerFunc = func(_ ...server.Option) (ServerRunner, error) {
@@ -222,6 +250,8 @@ func Test_Start_HTTPServerCreateError(t *testing.T) {
 
 	err := start(nil, nil)
 	is.Error(err)
+
+	waitForSignal(t, firstCalled, "ListenAndServe (tls)")
 
 	mock.AssertExpectationsForObjects(t, firstServer)
 }
