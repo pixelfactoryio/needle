@@ -154,10 +154,10 @@ go.opentelemetry.io/otel/sdk/metric v1.38.0 h1:aSH66iL0aZqo//xXzQLYozmWrXxyFkBJ6
 go.opentelemetry.io/otel/sdk/metric v1.38.0/go.mod h1:dg9PBnW9XdQ1Hd6ZnRz689CbtrUp0wMMs9iPcgT9EZA=
 go.opentelemetry.io/otel/trace v1.38.0 h1:Fxk5bKrDZJUH+AMyyIXGcFAPah0oRcT+LuNtJrmcNLE=
 go.opentelemetry.io/otel/trace v1.38.0/go.mod h1:j1P9ivuFsTceSWe1oY+EeW3sc+Pp42sO++GHkg4wwhs=
-go.pixelfactory.io/pkg/observability/log v1.4.3 h1:Nj6FZKPBiZ+zHm6PiN4JPs2RmioERGIoP3UL2asjxUs=
-go.pixelfactory.io/pkg/observability/log v1.4.3/go.mod h1:WlzGnw+4unH/K3JMP3D9rdCgnrnFQg86C9vi95EpKuc=
-go.pixelfactory.io/pkg/server v0.5.1 h1:uuZ7+/M/F51TtIul17YzPDF3YiXkyHngh2gzf1UmIQg=
-go.pixelfactory.io/pkg/server v0.5.1/go.mod h1:vrofVfJDtVcDiobe+rYd7S4n47Mx6jVDllsfdAqx+UA=
+go.pixelfactory.io/pkg/observability/log v1.5.0 h1:ADrfC8X0/WtUWXFr8i0bbiG5ayLe0CyYzJzbzFleN/I=
+go.pixelfactory.io/pkg/observability/log v1.5.0/go.mod h1:WlzGnw+4unH/K3JMP3D9rdCgnrnFQg86C9vi95EpKuc=
+go.pixelfactory.io/pkg/server v0.7.1 h1:t7BmnklJWGyt27RkXavgpS90KsqfJfl/gcG+Qh2MydY=
+go.pixelfactory.io/pkg/server v0.7.1/go.mod h1:vrofVfJDtVcDiobe+rYd7S4n47Mx6jVDllsfdAqx+UA=
 go.pixelfactory.io/pkg/version v0.2.3 h1:FVqsXbo8qaX30g5ZeZa6ixgjAzBiNmok7G3JDVshU/U=
 go.pixelfactory.io/pkg/version v0.2.3/go.mod h1:pB11yth48U3BxUWY4R+I24A12EO5+03mve70c5EnTvc=
 go.uber.org/automaxprocs v1.6.0 h1:O3y2/QNTOdbF+e/dpXNNW7Rx2hZ4sTIPyybbxyNqTUs=
